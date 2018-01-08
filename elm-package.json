@@ -1,14 +1,13 @@
 {
     "version": "1.0.0",
-    "summary": "helpful summary of your project, less than 80 characters",
-    "repository": "https://github.com/user/project.git",
-    "license": "BSD3",
+    "summary": "A web app for answering questions of the form 'What's a word that...?'",
+    "repository": "https://github.com/mmachenry/whats-a-word-that.git",
+    "license": "MIT",
     "source-directories": [
-        "."
+        "src"
     ],
     "exposed-modules": [],
     "dependencies": {
-        "FabienHenon/elm-infinite-scroll": "2.3.1 <= v < 3.0.0",
         "Skinney/elm-array-exploration": "2.0.5 <= v < 3.0.0",
         "elm-lang/core": "5.1.1 <= v < 6.0.0",
         "elm-lang/html": "2.0.0 <= v < 3.0.0",

@@ -53,8 +53,7 @@ update msg model = case msg of
     UpdateCategory str -> ({ model | category = str }, Cmd.none)
     UpdateRegex str -> ({ model | regex = str }, Cmd.none)
     Search -> (model, getCategoryMembers Nothing model.category)
-    LoadMore continueStr ->
-        (model, getCategoryMembers (Just continueStr) model.category)
+    LoadMore str -> (model, getCategoryMembers (Just str) model.category)
     UpdateResults _ (Err err) -> ({ model | error = Just err }, Cmd.none)
     UpdateResults append (Ok result) -> ({ model |
         error = Nothing,
@@ -70,7 +69,6 @@ view model = div [] [
     input [ placeholder "regex", onInput UpdateRegex ] [],
     button [ onClick Search ] [ text "search" ],
     viewResults model
-    --div [] [text (toString model)]
     ]
 
 viewResults : Model -> Html Msg
@@ -114,9 +112,8 @@ getCategoryMembers cmcontinue category =
 categoryList : Json.Decoder CategoryList
 categoryList =
     let continue = Json.field "cmcontinue" Json.string
-        query =
-            Json.map Array.fromList
-                (Json.field "categorymembers" (Json.list wikiPage))
+        query = Json.map Array.fromList
+                    (Json.field "categorymembers" (Json.list wikiPage))
         wikiPage = Json.map2 WikiPage
                                (Json.field "pageid" Json.int)
                                (Json.field "title" Json.string)
