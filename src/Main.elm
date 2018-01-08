@@ -1,3 +1,5 @@
+module Main exposing (main)
+
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
@@ -43,7 +45,7 @@ type Msg =
       UpdateCategory String
     | UpdateRegex String
     | Search
-    | LoadMore
+    | LoadMore String
     | UpdateResults Bool (Result Http.Error CategoryList)
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -51,8 +53,8 @@ update msg model = case msg of
     UpdateCategory str -> ({ model | category = str }, Cmd.none)
     UpdateRegex str -> ({ model | regex = str }, Cmd.none)
     Search -> (model, getCategoryMembers Nothing model.category)
-    LoadMore ->
-        (model, getCategoryMembers model.result.cmcontinue model.category)
+    LoadMore continueStr ->
+        (model, getCategoryMembers (Just continueStr) model.category)
     UpdateResults _ (Err err) -> ({ model | error = Just err }, Cmd.none)
     UpdateResults append (Ok result) -> ({ model |
         error = Nothing,
@@ -84,7 +86,9 @@ viewResults model =
                          " loaded / " ++
                          (toString (Array.length matches)) ++ " matches" ],
         ol [] (List.map mkListItem (Array.toList matches)),
-        button [ onClick LoadMore ] [text "Load more..."]
+        case model.result.cmcontinue of
+            Nothing -> div [] [ text "done" ]
+            Just str -> button [ onClick (LoadMore str) ] [text "Load more..."]
         ]
 
 subscriptions : Model -> Sub Msg
