@@ -4,7 +4,8 @@ import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Json
 import Regex
-import Array exposing (Array)
+import Array.Hamt exposing (Array)
+import Array.Hamt as Array
 
 main = Html.program {
     init = init,
@@ -109,7 +110,9 @@ getCategoryMembers cmcontinue category =
 categoryList : Json.Decoder CategoryList
 categoryList =
     let continue = Json.field "cmcontinue" Json.string
-        query = Json.field "categorymembers" (Json.array wikiPage)
+        query =
+            Json.map Array.fromList
+                (Json.field "categorymembers" (Json.list wikiPage))
         wikiPage = Json.map2 WikiPage
                                (Json.field "pageid" Json.int)
                                (Json.field "title" Json.string)
