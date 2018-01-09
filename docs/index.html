@@ -4,4 +4,27 @@
 <script>
     var node = document.getElementById('main');
     var app = Elm.Main.embed(node);
+
+    var callback = function (entries, observer) {
+        entries.forEach(entry => {
+            alert('observed entry');
+        });
+    };
+
+    var options = {
+        root : null,
+        rootMargin : "0px",
+        threshhold : 0.0,
+    };
+
+    var observer = new IntersectionObserver(callback, options);
+    
+    app.ports.observe.subscribe(function(element) {
+        window.requestAnimationFrame(function(timestamp) {
+            alert(element);
+            var target = document.querySelector(element);
+            observer.observe(target);
+        });
+    });
+
 </script>

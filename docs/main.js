@@ -10141,6 +10141,11 @@ var _elm_lang$http$Http$stringPart = _elm_lang$http$Http$StringPart;
 var _mmachenry$whats_a_word_that$Main$subscriptions = function (mode) {
 	return _elm_lang$core$Platform_Sub$none;
 };
+var _mmachenry$whats_a_word_that$Main$observe = _elm_lang$core$Native_Platform.outgoingPort(
+	'observe',
+	function (v) {
+		return v;
+	});
 var _mmachenry$whats_a_word_that$Main$init = function () {
 	var model = {
 		category: '',
@@ -10148,8 +10153,13 @@ var _mmachenry$whats_a_word_that$Main$init = function () {
 		error: _elm_lang$core$Maybe$Nothing,
 		result: {cmcontinue: _elm_lang$core$Maybe$Nothing, pages: _Skinney$elm_array_exploration$Array_Hamt$empty}
 	};
-	return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+	return {
+		ctor: '_Tuple2',
+		_0: model,
+		_1: _mmachenry$whats_a_word_that$Main$observe('loadBtn')
+	};
 }();
+var _mmachenry$whats_a_word_that$Main$onVisible = _elm_lang$core$Native_Platform.incomingPort('onVisible', _elm_lang$core$Json_Decode$string);
 var _mmachenry$whats_a_word_that$Main$Model = F4(
 	function (a, b, c, d) {
 		return {category: a, regex: b, error: c, result: d};
@@ -10224,11 +10234,20 @@ var _mmachenry$whats_a_word_that$Main$getCategoryMembers = F2(
 											}
 										}(),
 										A2(_elm_lang$core$Basics_ops['++'], 'cmtitle=', category)))))))));
-		return A2(
-			_elm_lang$http$Http$send,
-			_mmachenry$whats_a_word_that$Main$UpdateResults(
-				!_elm_lang$core$Native_Utils.eq(cmcontinue, _elm_lang$core$Maybe$Nothing)),
-			A2(_elm_lang$http$Http$get, url, _mmachenry$whats_a_word_that$Main$categoryList));
+		return _elm_lang$core$Platform_Cmd$batch(
+			{
+				ctor: '::',
+				_0: _mmachenry$whats_a_word_that$Main$observe('#loadBtn'),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$http$Http$send,
+						_mmachenry$whats_a_word_that$Main$UpdateResults(
+							!_elm_lang$core$Native_Utils.eq(cmcontinue, _elm_lang$core$Maybe$Nothing)),
+						A2(_elm_lang$http$Http$get, url, _mmachenry$whats_a_word_that$Main$categoryList)),
+					_1: {ctor: '[]'}
+				}
+			});
 	});
 var _mmachenry$whats_a_word_that$Main$update = F2(
 	function (msg, model) {
@@ -10381,7 +10400,11 @@ var _mmachenry$whats_a_word_that$Main$viewResults = function (model) {
 									ctor: '::',
 									_0: _elm_lang$html$Html_Events$onClick(
 										_mmachenry$whats_a_word_that$Main$LoadMore(_p3._0)),
-									_1: {ctor: '[]'}
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$id('loadBtn'),
+										_1: {ctor: '[]'}
+									}
 								},
 								{
 									ctor: '::',

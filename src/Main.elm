@@ -1,4 +1,4 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -8,6 +8,10 @@ import Json.Decode as Json
 import Regex
 import Array.Hamt exposing (Array)
 import Array.Hamt as Array
+import Platform.Cmd
+
+port observe : String -> Cmd msg
+port onVisible : (String -> msg) -> Sub msg
 
 main = Html.program {
     init = init,
@@ -39,7 +43,7 @@ init =
         regex = "",
         error = Nothing,
         result = { cmcontinue = Nothing, pages = Array.empty } }
-    in (model, Cmd.none)
+    in (model, observe "loadBtn")
 
 type Msg =
       UpdateCategory String
@@ -86,7 +90,8 @@ viewResults model =
         ol [] (List.map mkListItem (Array.toList matches)),
         case model.result.cmcontinue of
             Nothing -> div [] [ text "done" ]
-            Just str -> button [ onClick (LoadMore str) ] [text "Load more..."]
+            Just str -> button [ onClick (LoadMore str), id "loadBtn" ]
+                               [text "Load more..."]
         ]
 
 subscriptions : Model -> Sub Msg
@@ -106,8 +111,11 @@ getCategoryMembers cmcontinue category =
             Just str -> "cmcontinue=" ++ str ++ "&"
             Nothing -> "") ++
         "cmtitle=" ++ category
-    in Http.send (UpdateResults (cmcontinue /= Nothing))
-                 (Http.get url categoryList)
+    in Platform.Cmd.batch [
+            observe "#loadBtn",
+            Http.send (UpdateResults (cmcontinue /= Nothing))
+                      (Http.get url categoryList)
+            ]
 
 categoryList : Json.Decoder CategoryList
 categoryList =
