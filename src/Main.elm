@@ -43,7 +43,7 @@ init =
         regex = "",
         error = Nothing,
         result = { cmcontinue = Nothing, pages = Array.empty } }
-    in (model, observe "loadBtn")
+    in (model, observe "#loadBtn")
 
 type Msg =
       UpdateCategory String
@@ -51,6 +51,7 @@ type Msg =
     | Search
     | LoadMore String
     | UpdateResults Bool (Result Http.Error CategoryList)
+    | NullOp
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = case msg of
@@ -66,6 +67,7 @@ update msg model = case msg of
                         pages = Array.append model.result.pages result.pages }
                  else result
         }, Cmd.none)
+    NullOp -> (model, Cmd.none)
 
 view : Model -> Html Msg
 view model = div [] [
@@ -88,14 +90,19 @@ viewResults model =
                          " loaded / " ++
                          (toString (Array.length matches)) ++ " matches" ],
         ol [] (List.map mkListItem (Array.toList matches)),
-        case model.result.cmcontinue of
-            Nothing -> div [] [ text "done" ]
-            Just str -> button [ onClick (LoadMore str), id "loadBtn" ]
-                               [text "Load more..."]
+        div [id "loadBtn"] [
+            case model.result.cmcontinue of
+                Nothing -> div [] [ text "done" ]
+                Just str -> button [ onClick (LoadMore str) ]
+                                   [text "Load more..."]
+            ]
         ]
 
 subscriptions : Model -> Sub Msg
-subscriptions mode = Sub.none
+subscriptions model =
+    onVisible (\_->case model.result.cmcontinue of
+        Nothing -> NullOp
+        Just str -> LoadMore str)
 
 getCategoryMembers : Maybe String -> String -> Cmd Msg
 getCategoryMembers cmcontinue category =
@@ -111,11 +118,8 @@ getCategoryMembers cmcontinue category =
             Just str -> "cmcontinue=" ++ str ++ "&"
             Nothing -> "") ++
         "cmtitle=" ++ category
-    in Platform.Cmd.batch [
-            observe "#loadBtn",
-            Http.send (UpdateResults (cmcontinue /= Nothing))
-                      (Http.get url categoryList)
-            ]
+    in Http.send (UpdateResults (cmcontinue /= Nothing))
+                 (Http.get url categoryList)
 
 categoryList : Json.Decoder CategoryList
 categoryList =
