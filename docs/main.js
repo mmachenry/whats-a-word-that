@@ -10148,6 +10148,7 @@ var _mmachenry$whats_a_word_that$Main$init = function () {
 		category: '',
 		regex: '',
 		error: _elm_lang$core$Maybe$Nothing,
+		visible: false,
 		result: {cmcontinue: _elm_lang$core$Maybe$Nothing, pages: _Skinney$elm_array_exploration$Array_Hamt$empty}
 	};
 	return {
@@ -10156,10 +10157,23 @@ var _mmachenry$whats_a_word_that$Main$init = function () {
 		_1: _mmachenry$whats_a_word_that$Main$observe('#loadBtn')
 	};
 }();
-var _mmachenry$whats_a_word_that$Main$onVisible = _elm_lang$core$Native_Platform.incomingPort('onVisible', _elm_lang$core$Json_Decode$string);
-var _mmachenry$whats_a_word_that$Main$Model = F4(
-	function (a, b, c, d) {
-		return {category: a, regex: b, error: c, result: d};
+var _mmachenry$whats_a_word_that$Main$onVisible = _elm_lang$core$Native_Platform.incomingPort(
+	'onVisible',
+	A2(
+		_elm_lang$core$Json_Decode$andThen,
+		function (x0) {
+			return A2(
+				_elm_lang$core$Json_Decode$andThen,
+				function (x1) {
+					return _elm_lang$core$Json_Decode$succeed(
+						{ctor: '_Tuple2', _0: x0, _1: x1});
+				},
+				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$bool));
+		},
+		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
+var _mmachenry$whats_a_word_that$Main$Model = F5(
+	function (a, b, c, d, e) {
+		return {category: a, regex: b, error: c, visible: d, result: e};
 	});
 var _mmachenry$whats_a_word_that$Main$CategoryList = F2(
 	function (a, b) {
@@ -10190,7 +10204,12 @@ var _mmachenry$whats_a_word_that$Main$categoryList = function () {
 			A2(_elm_lang$core$Json_Decode$field, 'continue', $continue)),
 		A2(_elm_lang$core$Json_Decode$field, 'query', query));
 }();
-var _mmachenry$whats_a_word_that$Main$NullOp = {ctor: 'NullOp'};
+var _mmachenry$whats_a_word_that$Main$UpdateVisibility = function (a) {
+	return {ctor: 'UpdateVisibility', _0: a};
+};
+var _mmachenry$whats_a_word_that$Main$subscriptions = function (model) {
+	return _mmachenry$whats_a_word_that$Main$onVisible(_mmachenry$whats_a_word_that$Main$UpdateVisibility);
+};
 var _mmachenry$whats_a_word_that$Main$UpdateResults = F2(
 	function (a, b) {
 		return {ctor: 'UpdateResults', _0: a, _1: b};
@@ -10285,7 +10304,7 @@ var _mmachenry$whats_a_word_that$Main$update = F2(
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				} else {
-					var _p2 = _p1._1._0;
+					var _p3 = _p1._1._0;
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
@@ -10293,15 +10312,36 @@ var _mmachenry$whats_a_word_that$Main$update = F2(
 							{
 								error: _elm_lang$core$Maybe$Nothing,
 								result: _p1._0 ? {
-									cmcontinue: _p2.cmcontinue,
-									pages: A2(_Skinney$elm_array_exploration$Array_Hamt$append, model.result.pages, _p2.pages)
-								} : _p2
+									cmcontinue: _p3.cmcontinue,
+									pages: A2(_Skinney$elm_array_exploration$Array_Hamt$append, model.result.pages, _p3.pages)
+								} : _p3
 							}),
-						_1: _elm_lang$core$Platform_Cmd$none
+						_1: function () {
+							if (model.visible) {
+								var _p2 = _p3.cmcontinue;
+								if (_p2.ctor === 'Nothing') {
+									return _elm_lang$core$Platform_Cmd$none;
+								} else {
+									return A2(
+										_mmachenry$whats_a_word_that$Main$getCategoryMembers,
+										_elm_lang$core$Maybe$Just(_p2._0),
+										model.category);
+								}
+							} else {
+								return _elm_lang$core$Platform_Cmd$none;
+							}
+						}()
 					};
 				}
 			default:
-				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				var _p4 = _p1._0._1;
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{visible: _p4}),
+					_1: _p4 ? A2(_mmachenry$whats_a_word_that$Main$getCategoryMembers, model.result.cmcontinue, model.category) : _elm_lang$core$Platform_Cmd$none
+				};
 		}
 	});
 var _mmachenry$whats_a_word_that$Main$LoadMore = function (a) {
@@ -10383,8 +10423,8 @@ var _mmachenry$whats_a_word_that$Main$viewResults = function (model) {
 						{
 							ctor: '::',
 							_0: function () {
-								var _p3 = model.result.cmcontinue;
-								if (_p3.ctor === 'Nothing') {
+								var _p5 = model.result.cmcontinue;
+								if (_p5.ctor === 'Nothing') {
 									return A2(
 										_elm_lang$html$Html$div,
 										{ctor: '[]'},
@@ -10399,7 +10439,7 @@ var _mmachenry$whats_a_word_that$Main$viewResults = function (model) {
 										{
 											ctor: '::',
 											_0: _elm_lang$html$Html_Events$onClick(
-												_mmachenry$whats_a_word_that$Main$LoadMore(_p3._0)),
+												_mmachenry$whats_a_word_that$Main$LoadMore(_p5._0)),
 											_1: {ctor: '[]'}
 										},
 										{
@@ -10413,17 +10453,6 @@ var _mmachenry$whats_a_word_that$Main$viewResults = function (model) {
 						}),
 					_1: {ctor: '[]'}
 				}
-			}
-		});
-};
-var _mmachenry$whats_a_word_that$Main$subscriptions = function (model) {
-	return _mmachenry$whats_a_word_that$Main$onVisible(
-		function (_p4) {
-			var _p5 = model.result.cmcontinue;
-			if (_p5.ctor === 'Nothing') {
-				return _mmachenry$whats_a_word_that$Main$NullOp;
-			} else {
-				return _mmachenry$whats_a_word_that$Main$LoadMore(_p5._0);
 			}
 		});
 };

@@ -11,7 +11,7 @@ import Array.Hamt as Array
 import Platform.Cmd
 
 port observe : String -> Cmd msg
-port onVisible : (String -> msg) -> Sub msg
+port onVisible : ((String, Bool) -> msg) -> Sub msg
 
 main = Html.program {
     init = init,
@@ -23,6 +23,7 @@ type alias Model = {
     category : String,
     regex : String,
     error : Maybe Http.Error,
+    visible : Bool,
     result : CategoryList
     }
 
@@ -42,6 +43,7 @@ init =
         category = "",
         regex = "",
         error = Nothing,
+        visible = False,
         result = { cmcontinue = Nothing, pages = Array.empty } }
     in (model, observe "#loadBtn")
 
@@ -51,7 +53,7 @@ type Msg =
     | Search
     | LoadMore String
     | UpdateResults Bool (Result Http.Error CategoryList)
-    | NullOp
+    | UpdateVisibility (String, Bool)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = case msg of
@@ -66,8 +68,16 @@ update msg model = case msg of
                  then { cmcontinue = result.cmcontinue,
                         pages = Array.append model.result.pages result.pages }
                  else result
-        }, Cmd.none)
-    NullOp -> (model, Cmd.none)
+        }, if model.visible
+           then case result.cmcontinue of
+                    Nothing -> Cmd.none
+                    Just str -> getCategoryMembers (Just str) model.category
+           else Cmd.none)
+    UpdateVisibility (elementId, shown) ->
+        ({ model | visible = shown },
+        if shown
+        then getCategoryMembers model.result.cmcontinue model.category
+        else Cmd.none)
 
 view : Model -> Html Msg
 view model = div [] [
@@ -99,10 +109,7 @@ viewResults model =
         ]
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
-    onVisible (\_->case model.result.cmcontinue of
-        Nothing -> NullOp
-        Just str -> LoadMore str)
+subscriptions model = onVisible UpdateVisibility
 
 getCategoryMembers : Maybe String -> String -> Cmd Msg
 getCategoryMembers cmcontinue category =

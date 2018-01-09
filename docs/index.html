@@ -7,9 +7,7 @@
 
     var observer = new IntersectionObserver(function (entries, observer) {
         entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                app.ports.onVisible.send(entry.target.id);
-            }
+            app.ports.onVisible.send([entry.target.id, entry.isIntersecting]);
         });
     });
     
