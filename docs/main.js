@@ -10334,13 +10334,27 @@ var _mmachenry$whats_a_word_that$Main$update = F2(
 					};
 				}
 			default:
-				var _p4 = _p1._0._1;
+				var _p5 = _p1._0._1;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{visible: _p4}),
-					_1: _p4 ? A2(_mmachenry$whats_a_word_that$Main$getCategoryMembers, model.result.cmcontinue, model.category) : _elm_lang$core$Platform_Cmd$none
+						{visible: _p5}),
+					_1: function () {
+						if (_p5) {
+							var _p4 = model.result.cmcontinue;
+							if (_p4.ctor === 'Nothing') {
+								return _elm_lang$core$Platform_Cmd$none;
+							} else {
+								return A2(
+									_mmachenry$whats_a_word_that$Main$getCategoryMembers,
+									_elm_lang$core$Maybe$Just(_p4._0),
+									model.category);
+							}
+						} else {
+							return _elm_lang$core$Platform_Cmd$none;
+						}
+					}()
 				};
 		}
 	});
@@ -10423,8 +10437,8 @@ var _mmachenry$whats_a_word_that$Main$viewResults = function (model) {
 						{
 							ctor: '::',
 							_0: function () {
-								var _p5 = model.result.cmcontinue;
-								if (_p5.ctor === 'Nothing') {
+								var _p6 = model.result.cmcontinue;
+								if (_p6.ctor === 'Nothing') {
 									return A2(
 										_elm_lang$html$Html$div,
 										{ctor: '[]'},
@@ -10439,7 +10453,7 @@ var _mmachenry$whats_a_word_that$Main$viewResults = function (model) {
 										{
 											ctor: '::',
 											_0: _elm_lang$html$Html_Events$onClick(
-												_mmachenry$whats_a_word_that$Main$LoadMore(_p5._0)),
+												_mmachenry$whats_a_word_that$Main$LoadMore(_p6._0)),
 											_1: {ctor: '[]'}
 										},
 										{

@@ -8,7 +8,6 @@ import Json.Decode as Json
 import Regex
 import Array.Hamt exposing (Array)
 import Array.Hamt as Array
-import Platform.Cmd
 
 port observe : String -> Cmd msg
 port onVisible : ((String, Bool) -> msg) -> Sub msg
@@ -76,7 +75,9 @@ update msg model = case msg of
     UpdateVisibility (elementId, shown) ->
         ({ model | visible = shown },
         if shown
-        then getCategoryMembers model.result.cmcontinue model.category
+        then case model.result.cmcontinue of
+                 Nothing -> Cmd.none
+                 Just str -> getCategoryMembers (Just str) model.category
         else Cmd.none)
 
 view : Model -> Html Msg
