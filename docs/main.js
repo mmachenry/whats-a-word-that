@@ -10144,13 +10144,7 @@ var _mmachenry$whats_a_word_that$Main$observe = _elm_lang$core$Native_Platform.o
 		return v;
 	});
 var _mmachenry$whats_a_word_that$Main$init = function () {
-	var model = {
-		category: '',
-		regex: '',
-		error: _elm_lang$core$Maybe$Nothing,
-		visible: false,
-		result: {cmcontinue: _elm_lang$core$Maybe$Nothing, pages: _Skinney$elm_array_exploration$Array_Hamt$empty}
-	};
+	var model = {category: '', regex: '', error: _elm_lang$core$Maybe$Nothing, visible: false, $continue: _elm_lang$core$Maybe$Nothing, pages: _Skinney$elm_array_exploration$Array_Hamt$empty};
 	return {
 		ctor: '_Tuple2',
 		_0: model,
@@ -10171,9 +10165,9 @@ var _mmachenry$whats_a_word_that$Main$onVisible = _elm_lang$core$Native_Platform
 				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$bool));
 		},
 		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
-var _mmachenry$whats_a_word_that$Main$Model = F5(
-	function (a, b, c, d, e) {
-		return {category: a, regex: b, error: c, visible: d, result: e};
+var _mmachenry$whats_a_word_that$Main$Model = F6(
+	function (a, b, c, d, e, f) {
+		return {category: a, regex: b, error: c, visible: d, $continue: e, pages: f};
 	});
 var _mmachenry$whats_a_word_that$Main$CategoryList = F2(
 	function (a, b) {
@@ -10210,12 +10204,11 @@ var _mmachenry$whats_a_word_that$Main$UpdateVisibility = function (a) {
 var _mmachenry$whats_a_word_that$Main$subscriptions = function (model) {
 	return _mmachenry$whats_a_word_that$Main$onVisible(_mmachenry$whats_a_word_that$Main$UpdateVisibility);
 };
-var _mmachenry$whats_a_word_that$Main$UpdateResults = F2(
-	function (a, b) {
-		return {ctor: 'UpdateResults', _0: a, _1: b};
-	});
+var _mmachenry$whats_a_word_that$Main$UpdateResults = function (a) {
+	return {ctor: 'UpdateResults', _0: a};
+};
 var _mmachenry$whats_a_word_that$Main$getCategoryMembers = F2(
-	function (cmcontinue, category) {
+	function (category, $continue) {
 		var url = A2(
 			_elm_lang$core$Basics_ops['++'],
 			'https://en.wikipedia.org/w/api.php?',
@@ -10240,7 +10233,7 @@ var _mmachenry$whats_a_word_that$Main$getCategoryMembers = F2(
 									A2(
 										_elm_lang$core$Basics_ops['++'],
 										function () {
-											var _p0 = cmcontinue;
+											var _p0 = $continue;
 											if (_p0.ctor === 'Just') {
 												return A2(
 													_elm_lang$core$Basics_ops['++'],
@@ -10253,114 +10246,98 @@ var _mmachenry$whats_a_word_that$Main$getCategoryMembers = F2(
 										A2(_elm_lang$core$Basics_ops['++'], 'cmtitle=', category)))))))));
 		return A2(
 			_elm_lang$http$Http$send,
-			_mmachenry$whats_a_word_that$Main$UpdateResults(
-				!_elm_lang$core$Native_Utils.eq(cmcontinue, _elm_lang$core$Maybe$Nothing)),
+			_mmachenry$whats_a_word_that$Main$UpdateResults,
 			A2(_elm_lang$http$Http$get, url, _mmachenry$whats_a_word_that$Main$categoryList));
 	});
+var _mmachenry$whats_a_word_that$Main$LoadMore = {ctor: 'LoadMore'};
 var _mmachenry$whats_a_word_that$Main$update = F2(
 	function (msg, model) {
-		var _p1 = msg;
-		switch (_p1.ctor) {
-			case 'UpdateCategory':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{category: _p1._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'UpdateRegex':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{regex: _p1._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'Search':
-				return {
-					ctor: '_Tuple2',
-					_0: model,
-					_1: A2(_mmachenry$whats_a_word_that$Main$getCategoryMembers, _elm_lang$core$Maybe$Nothing, model.category)
-				};
-			case 'LoadMore':
-				return {
-					ctor: '_Tuple2',
-					_0: model,
-					_1: A2(
-						_mmachenry$whats_a_word_that$Main$getCategoryMembers,
-						_elm_lang$core$Maybe$Just(_p1._0),
-						model.category)
-				};
-			case 'UpdateResults':
-				if (_p1._1.ctor === 'Err') {
+		update:
+		while (true) {
+			var _p1 = msg;
+			switch (_p1.ctor) {
+				case 'UpdateCategory':
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
-							{
-								error: _elm_lang$core$Maybe$Just(_p1._1._0)
-							}),
+							{category: _p1._0}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
-				} else {
-					var _p3 = _p1._1._0;
+				case 'UpdateRegex':
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
-							{
-								error: _elm_lang$core$Maybe$Nothing,
-								result: _p1._0 ? {
-									cmcontinue: _p3.cmcontinue,
-									pages: A2(_Skinney$elm_array_exploration$Array_Hamt$append, model.result.pages, _p3.pages)
-								} : _p3
-							}),
+							{regex: _p1._0}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				case 'Search':
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{$continue: _elm_lang$core$Maybe$Nothing, pages: _Skinney$elm_array_exploration$Array_Hamt$empty}),
+						_1: A2(_mmachenry$whats_a_word_that$Main$getCategoryMembers, model.category, _elm_lang$core$Maybe$Nothing)
+					};
+				case 'LoadMore':
+					return {
+						ctor: '_Tuple2',
+						_0: model,
 						_1: function () {
 							if (model.visible) {
-								var _p2 = _p3.cmcontinue;
-								if (_p2.ctor === 'Nothing') {
-									return _elm_lang$core$Platform_Cmd$none;
-								} else {
+								var _p2 = model.$continue;
+								if (_p2.ctor === 'Just') {
 									return A2(
 										_mmachenry$whats_a_word_that$Main$getCategoryMembers,
-										_elm_lang$core$Maybe$Just(_p2._0),
-										model.category);
+										model.category,
+										_elm_lang$core$Maybe$Just(_p2._0));
+								} else {
+									return _elm_lang$core$Platform_Cmd$none;
 								}
 							} else {
 								return _elm_lang$core$Platform_Cmd$none;
 							}
 						}()
 					};
-				}
-			default:
-				var _p5 = _p1._0._1;
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
+				case 'UpdateResults':
+					if (_p1._0.ctor === 'Err') {
+						return {
+							ctor: '_Tuple2',
+							_0: _elm_lang$core$Native_Utils.update(
+								model,
+								{
+									error: _elm_lang$core$Maybe$Just(_p1._0._0)
+								}),
+							_1: _elm_lang$core$Platform_Cmd$none
+						};
+					} else {
+						var _p3 = _p1._0._0;
+						var newModel = _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								error: _elm_lang$core$Maybe$Nothing,
+								$continue: _p3.cmcontinue,
+								pages: A2(_Skinney$elm_array_exploration$Array_Hamt$append, model.pages, _p3.pages)
+							});
+						var _v3 = _mmachenry$whats_a_word_that$Main$LoadMore,
+							_v4 = newModel;
+						msg = _v3;
+						model = _v4;
+						continue update;
+					}
+				default:
+					var newModel = _elm_lang$core$Native_Utils.update(
 						model,
-						{visible: _p5}),
-					_1: function () {
-						if (_p5) {
-							var _p4 = model.result.cmcontinue;
-							if (_p4.ctor === 'Nothing') {
-								return _elm_lang$core$Platform_Cmd$none;
-							} else {
-								return A2(
-									_mmachenry$whats_a_word_that$Main$getCategoryMembers,
-									_elm_lang$core$Maybe$Just(_p4._0),
-									model.category);
-							}
-						} else {
-							return _elm_lang$core$Platform_Cmd$none;
-						}
-					}()
-				};
+						{visible: _p1._0._1});
+					var _v5 = _mmachenry$whats_a_word_that$Main$LoadMore,
+						_v6 = newModel;
+					msg = _v5;
+					model = _v6;
+					continue update;
+			}
 		}
 	});
-var _mmachenry$whats_a_word_that$Main$LoadMore = function (a) {
-	return {ctor: 'LoadMore', _0: a};
-};
 var _mmachenry$whats_a_word_that$Main$viewResults = function (model) {
 	var mkListItem = function (page) {
 		return A2(
@@ -10390,7 +10367,7 @@ var _mmachenry$whats_a_word_that$Main$viewResults = function (model) {
 		function (p) {
 			return A2(_elm_lang$core$Regex$contains, regex, p.title);
 		},
-		model.result.pages);
+		model.pages);
 	return A2(
 		_elm_lang$html$Html$div,
 		{ctor: '[]'},
@@ -10405,7 +10382,7 @@ var _mmachenry$whats_a_word_that$Main$viewResults = function (model) {
 						A2(
 							_elm_lang$core$Basics_ops['++'],
 							_elm_lang$core$Basics$toString(
-								_Skinney$elm_array_exploration$Array_Hamt$length(model.result.pages)),
+								_Skinney$elm_array_exploration$Array_Hamt$length(model.pages)),
 							A2(
 								_elm_lang$core$Basics_ops['++'],
 								' loaded / ',
@@ -10432,37 +10409,27 @@ var _mmachenry$whats_a_word_that$Main$viewResults = function (model) {
 						{
 							ctor: '::',
 							_0: _elm_lang$html$Html_Attributes$id('loadBtn'),
-							_1: {ctor: '[]'}
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$hidden(
+									_elm_lang$core$Native_Utils.eq(model.$continue, _elm_lang$core$Maybe$Nothing)),
+								_1: {ctor: '[]'}
+							}
 						},
 						{
 							ctor: '::',
-							_0: function () {
-								var _p6 = model.result.cmcontinue;
-								if (_p6.ctor === 'Nothing') {
-									return A2(
-										_elm_lang$html$Html$div,
-										{ctor: '[]'},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text('done'),
-											_1: {ctor: '[]'}
-										});
-								} else {
-									return A2(
-										_elm_lang$html$Html$button,
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html_Events$onClick(
-												_mmachenry$whats_a_word_that$Main$LoadMore(_p6._0)),
-											_1: {ctor: '[]'}
-										},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text('Load more...'),
-											_1: {ctor: '[]'}
-										});
-								}
-							}(),
+							_0: A2(
+								_elm_lang$html$Html$button,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onClick(_mmachenry$whats_a_word_that$Main$LoadMore),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('Load more...'),
+									_1: {ctor: '[]'}
+								}),
 							_1: {ctor: '[]'}
 						}),
 					_1: {ctor: '[]'}

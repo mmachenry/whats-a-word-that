@@ -23,12 +23,13 @@ type alias Model = {
     regex : String,
     error : Maybe Http.Error,
     visible : Bool,
-    result : CategoryList
+    continue : Maybe String,
+    pages : Array WikiPage
     }
 
 type alias CategoryList = {
     cmcontinue : Maybe String,
-    pages : Array WikiPage
+    pages : List WikiPage
     }
 
 type alias WikiPage = {
@@ -43,42 +44,31 @@ init =
         regex = "",
         error = Nothing,
         visible = False,
-        result = { cmcontinue = Nothing, pages = Array.empty } }
+        continue = Nothing,
+        pages = Array.empty }
     in (model, observe "#loadBtn")
 
 type Msg =
       UpdateCategory String
     | UpdateRegex String
     | Search
-    | LoadMore String
-    | UpdateResults Bool (Result Http.Error CategoryList)
+    | LoadMore
     | UpdateVisibility (String, Bool)
+    | UpdateResults (Result Http.Error CategoryList)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = case msg of
     UpdateCategory str -> ({ model | category = str }, Cmd.none)
     UpdateRegex str -> ({ model | regex = str }, Cmd.none)
-    Search -> (model, getCategoryMembers Nothing model.category)
-    LoadMore str -> (model, getCategoryMembers (Just str) model.category)
-    UpdateResults _ (Err err) -> ({ model | error = Just err }, Cmd.none)
-    UpdateResults append (Ok result) -> ({ model |
+    Search -> ({ model | continue = Nothing, pages = Array.empty },
+               getCategoryMembers model.category Nothing)
+    LoadMore -> loadMore model
+    UpdateVisibility (elementId, shown) -> loadMore { model | visible = shown }
+    UpdateResults (Err err) -> ({ model | error = Just err }, Cmd.none)
+    UpdateResults (Ok result) -> loadMore { model |
         error = Nothing,
-        result = if append
-                 then { cmcontinue = result.cmcontinue,
-                        pages = Array.append model.result.pages result.pages }
-                 else result
-        }, if model.visible
-           then case result.cmcontinue of
-                    Nothing -> Cmd.none
-                    Just str -> getCategoryMembers (Just str) model.category
-           else Cmd.none)
-    UpdateVisibility (elementId, shown) ->
-        ({ model | visible = shown },
-        if shown
-        then case model.result.cmcontinue of
-                 Nothing -> Cmd.none
-                 Just str -> getCategoryMembers (Just str) model.category
-        else Cmd.none)
+        continue = result.cmcontinue,
+        pages = Array.append model.pages (Array.fromList result.pages) }
 
 view : Model -> Html Msg
 view model = div [] [
@@ -92,28 +82,23 @@ viewResults : Model -> Html Msg
 viewResults model =
     let regex = Regex.regex model.regex
         matches = Array.filter (\p->Regex.contains regex p.title)
-                                model.result.pages
+                                model.pages
         mkListItem page =
             li [] [a [href ("https://en.wikipedia.org/wiki/" ++ page.title)]
                      [text page.title]]
     in div [] [
-        div [] [ text <| (toString (Array.length model.result.pages)) ++
+        div [] [ text <| (toString (Array.length model.pages)) ++
                          " loaded / " ++
                          (toString (Array.length matches)) ++ " matches" ],
         ol [] (List.map mkListItem (Array.toList matches)),
-        div [id "loadBtn"] [
-            case model.result.cmcontinue of
-                Nothing -> div [] [ text "done" ]
-                Just str -> button [ onClick (LoadMore str) ]
-                                   [text "Load more..."]
-            ]
-        ]
+        div [id "loadBtn", hidden (model.continue == Nothing)]
+            [button [onClick LoadMore] [text "Load more..."]]]
 
 subscriptions : Model -> Sub Msg
 subscriptions model = onVisible UpdateVisibility
 
-getCategoryMembers : Maybe String -> String -> Cmd Msg
-getCategoryMembers cmcontinue category =
+getCategoryMembers : String -> Maybe String -> Cmd Msg
+getCategoryMembers category continue =
     let url =
         "https://en.wikipedia.org/w/api.php?" ++
         "action=query&" ++
@@ -122,18 +107,24 @@ getCategoryMembers cmcontinue category =
         "origin=*&" ++
         "format=json&" ++
         "cmtype=page&" ++
-        (case cmcontinue of
+        (case continue of
             Just str -> "cmcontinue=" ++ str ++ "&"
             Nothing -> "") ++
         "cmtitle=" ++ category
-    in Http.send (UpdateResults (cmcontinue /= Nothing))
-                 (Http.get url categoryList)
+    in Http.send UpdateResults (Http.get url categoryList)
+
+loadMore : Model -> (Model, Cmd Msg)
+loadMore model = (model, 
+    if model.visible
+    then case model.continue of
+             Just str -> getCategoryMembers model.category (Just str)
+             Nothing -> Cmd.none
+    else Cmd.none)
 
 categoryList : Json.Decoder CategoryList
 categoryList =
     let continue = Json.field "cmcontinue" Json.string
-        query = Json.map Array.fromList
-                    (Json.field "categorymembers" (Json.list wikiPage))
+        query = Json.field "categorymembers" (Json.list wikiPage)
         wikiPage = Json.map2 WikiPage
                                (Json.field "pageid" Json.int)
                                (Json.field "title" Json.string)
