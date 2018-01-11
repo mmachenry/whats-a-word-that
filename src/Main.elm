@@ -63,8 +63,9 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = case msg of
     UpdateCategory str -> ({ model | category = str }, Cmd.none)
     UpdateRegex str -> ({ model | regex = str }, Cmd.none)
-    Search -> ({ model | continue = Nothing, pages = Array.empty },
-               getCategoryMembers model.category Nothing)
+    Search ->
+        ({model | continue = Nothing, pages = Array.empty, subCategories = []},
+         getCategoryMembers model.category Nothing)
     LoadMore -> loadMore model
     UpdateVisibility (elementId, shown) -> loadMore { model | visible = shown }
     UpdateResults (Err err) -> ({ model | error = Just err }, Cmd.none)

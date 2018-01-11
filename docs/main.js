@@ -10301,7 +10301,11 @@ var _mmachenry$whats_a_word_that$Main$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{$continue: _elm_lang$core$Maybe$Nothing, pages: _Skinney$elm_array_exploration$Array_Hamt$empty}),
+						{
+							$continue: _elm_lang$core$Maybe$Nothing,
+							pages: _Skinney$elm_array_exploration$Array_Hamt$empty,
+							subCategories: {ctor: '[]'}
+						}),
 					_1: A2(_mmachenry$whats_a_word_that$Main$getCategoryMembers, model.category, _elm_lang$core$Maybe$Nothing)
 				};
 			case 'LoadMore':
