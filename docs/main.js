@@ -10240,7 +10240,17 @@ var _mmachenry$whats_a_word_that$Main$getCategoryMembers = F2(
 											return '';
 										}
 									}(),
-									A2(_elm_lang$core$Basics_ops['++'], 'cmtitle=', category))))))));
+									A2(
+										_elm_lang$core$Basics_ops['++'],
+										'cmtitle=Category:',
+										A4(
+											_elm_lang$core$Regex$replace,
+											_elm_lang$core$Regex$All,
+											_elm_lang$core$Regex$regex(' '),
+											function (_p1) {
+												return '_';
+											},
+											category)))))))));
 		return A2(
 			_elm_lang$http$Http$send,
 			_mmachenry$whats_a_word_that$Main$UpdateResults,
@@ -10248,25 +10258,25 @@ var _mmachenry$whats_a_word_that$Main$getCategoryMembers = F2(
 	});
 var _mmachenry$whats_a_word_that$Main$loadMore = function (model) {
 	if (model.visible) {
-		var _p1 = model.subCategories;
-		if (_p1.ctor === '::') {
+		var _p2 = model.subCategories;
+		if (_p2.ctor === '::') {
 			return {
 				ctor: '_Tuple2',
 				_0: _elm_lang$core$Native_Utils.update(
 					model,
-					{subCategories: _p1._1}),
-				_1: A2(_mmachenry$whats_a_word_that$Main$getCategoryMembers, _p1._0.title, _elm_lang$core$Maybe$Nothing)
+					{subCategories: _p2._1}),
+				_1: A2(_mmachenry$whats_a_word_that$Main$getCategoryMembers, _p2._0.title, _elm_lang$core$Maybe$Nothing)
 			};
 		} else {
-			var _p2 = model.$continue;
-			if (_p2.ctor === 'Just') {
+			var _p3 = model.$continue;
+			if (_p3.ctor === 'Just') {
 				return {
 					ctor: '_Tuple2',
 					_0: model,
 					_1: A2(
 						_mmachenry$whats_a_word_that$Main$getCategoryMembers,
 						model.category,
-						_elm_lang$core$Maybe$Just(_p2._0))
+						_elm_lang$core$Maybe$Just(_p3._0))
 				};
 			} else {
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
@@ -10278,14 +10288,14 @@ var _mmachenry$whats_a_word_that$Main$loadMore = function (model) {
 };
 var _mmachenry$whats_a_word_that$Main$update = F2(
 	function (msg, model) {
-		var _p3 = msg;
-		switch (_p3.ctor) {
+		var _p4 = msg;
+		switch (_p4.ctor) {
 			case 'UpdateCategory':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{category: _p3._0}),
+						{category: _p4._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'UpdateRegex':
@@ -10293,7 +10303,7 @@ var _mmachenry$whats_a_word_that$Main$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{regex: _p3._0}),
+						{regex: _p4._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'Search':
@@ -10314,20 +10324,20 @@ var _mmachenry$whats_a_word_that$Main$update = F2(
 				return _mmachenry$whats_a_word_that$Main$loadMore(
 					_elm_lang$core$Native_Utils.update(
 						model,
-						{visible: _p3._0._1}));
+						{visible: _p4._0._1}));
 			default:
-				if (_p3._0.ctor === 'Err') {
+				if (_p4._0.ctor === 'Err') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								error: _elm_lang$core$Maybe$Just(_p3._0._0)
+								error: _elm_lang$core$Maybe$Just(_p4._0._0)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				} else {
-					var _p4 = _p3._0._0;
+					var _p5 = _p4._0._0;
 					var namespace = F2(
 						function (i, page) {
 							return _elm_lang$core$Native_Utils.eq(page.ns, i);
@@ -10340,17 +10350,17 @@ var _mmachenry$whats_a_word_that$Main$update = F2(
 						A2(
 							_elm_lang$core$List$filter,
 							namespace(0),
-							_p4.pages));
+							_p5.pages));
 					var newSubCats = A2(
 						_elm_lang$core$List$filter,
 						namespace(14),
-						_p4.pages);
+						_p5.pages);
 					return _mmachenry$whats_a_word_that$Main$loadMore(
 						_elm_lang$core$Native_Utils.update(
 							model,
 							{
 								error: _elm_lang$core$Maybe$Nothing,
-								$continue: _p4.cmcontinue,
+								$continue: _p5.cmcontinue,
 								pages: A2(
 									_Skinney$elm_array_exploration$Array_Hamt$append,
 									model.pages,

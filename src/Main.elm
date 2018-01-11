@@ -123,7 +123,8 @@ getCategoryMembers category continue =
         (case continue of
             Just str -> "cmcontinue=" ++ str ++ "&"
             Nothing -> "") ++
-        "cmtitle=" ++ category
+        "cmtitle=Category:" ++
+            Regex.replace Regex.All (Regex.regex " ") (\_->"_") category
     in Http.send UpdateResults (Http.get url categoryList)
 
 loadMore : Model -> (Model, Cmd Msg)
