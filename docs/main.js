@@ -10330,8 +10330,13 @@ var _mmachenry$whats_a_word_that$Main$update = F2(
 						});
 					var newPages = A2(
 						_elm_lang$core$List$filter,
-						namespace(0),
-						_p4.pages);
+						function (p) {
+							return !A2(_elm_lang$core$String$startsWith, 'List of', p.title);
+						},
+						A2(
+							_elm_lang$core$List$filter,
+							namespace(0),
+							_p4.pages));
 					var newSubCats = A2(
 						_elm_lang$core$List$filter,
 						namespace(14),

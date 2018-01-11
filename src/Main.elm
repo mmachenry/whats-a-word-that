@@ -70,7 +70,9 @@ update msg model = case msg of
     UpdateResults (Err err) -> ({ model | error = Just err }, Cmd.none)
     UpdateResults (Ok result) ->
         let namespace i page = page.ns == i
-            newPages = List.filter (namespace 0) result.pages
+            newPages =
+                List.filter (\p->not (String.startsWith "List of" p.title))
+                    (List.filter (namespace 0) result.pages)
             newSubCats = List.filter (namespace 14) result.pages
         in loadMore { model |
                error = Nothing,
