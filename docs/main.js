@@ -10145,6 +10145,7 @@ var _mmachenry$whats_a_word_that$Main$observe = _elm_lang$core$Native_Platform.o
 	});
 var _mmachenry$whats_a_word_that$Main$init = function () {
 	var model = {
+		categoryInput: '',
 		category: '',
 		regex: '',
 		error: _elm_lang$core$Maybe$Nothing,
@@ -10173,9 +10174,9 @@ var _mmachenry$whats_a_word_that$Main$onVisible = _elm_lang$core$Native_Platform
 				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$bool));
 		},
 		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
-var _mmachenry$whats_a_word_that$Main$Model = F7(
-	function (a, b, c, d, e, f, g) {
-		return {category: a, regex: b, error: c, visible: d, $continue: e, pages: f, subCategories: g};
+var _mmachenry$whats_a_word_that$Main$Model = F8(
+	function (a, b, c, d, e, f, g, h) {
+		return {categoryInput: a, category: b, regex: c, error: d, visible: e, $continue: f, pages: g, subCategories: h};
 	});
 var _mmachenry$whats_a_word_that$Main$CategoryList = F2(
 	function (a, b) {
@@ -10240,17 +10241,7 @@ var _mmachenry$whats_a_word_that$Main$getCategoryMembers = F2(
 											return '';
 										}
 									}(),
-									A2(
-										_elm_lang$core$Basics_ops['++'],
-										'cmtitle=Category:',
-										A4(
-											_elm_lang$core$Regex$replace,
-											_elm_lang$core$Regex$All,
-											_elm_lang$core$Regex$regex(' '),
-											function (_p1) {
-												return '_';
-											},
-											category)))))))));
+									A2(_elm_lang$core$Basics_ops['++'], 'cmtitle=', category))))))));
 		return A2(
 			_elm_lang$http$Http$send,
 			_mmachenry$whats_a_word_that$Main$UpdateResults,
@@ -10258,25 +10249,25 @@ var _mmachenry$whats_a_word_that$Main$getCategoryMembers = F2(
 	});
 var _mmachenry$whats_a_word_that$Main$loadMore = function (model) {
 	if (model.visible) {
-		var _p2 = model.subCategories;
-		if (_p2.ctor === '::') {
+		var _p1 = model.subCategories;
+		if (_p1.ctor === '::') {
 			return {
 				ctor: '_Tuple2',
 				_0: _elm_lang$core$Native_Utils.update(
 					model,
-					{subCategories: _p2._1}),
-				_1: A2(_mmachenry$whats_a_word_that$Main$getCategoryMembers, _p2._0.title, _elm_lang$core$Maybe$Nothing)
+					{subCategories: _p1._1}),
+				_1: A2(_mmachenry$whats_a_word_that$Main$getCategoryMembers, _p1._0.title, _elm_lang$core$Maybe$Nothing)
 			};
 		} else {
-			var _p3 = model.$continue;
-			if (_p3.ctor === 'Just') {
+			var _p2 = model.$continue;
+			if (_p2.ctor === 'Just') {
 				return {
 					ctor: '_Tuple2',
 					_0: model,
 					_1: A2(
 						_mmachenry$whats_a_word_that$Main$getCategoryMembers,
 						model.category,
-						_elm_lang$core$Maybe$Just(_p3._0))
+						_elm_lang$core$Maybe$Just(_p2._0))
 				};
 			} else {
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
@@ -10288,14 +10279,14 @@ var _mmachenry$whats_a_word_that$Main$loadMore = function (model) {
 };
 var _mmachenry$whats_a_word_that$Main$update = F2(
 	function (msg, model) {
-		var _p4 = msg;
-		switch (_p4.ctor) {
+		var _p3 = msg;
+		switch (_p3.ctor) {
 			case 'UpdateCategory':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{category: _p4._0}),
+						{categoryInput: _p3._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'UpdateRegex':
@@ -10303,20 +10294,22 @@ var _mmachenry$whats_a_word_that$Main$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{regex: _p4._0}),
+						{regex: _p3._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'Search':
+				var newCategory = A2(_elm_lang$core$Basics_ops['++'], 'Category:', model.categoryInput);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
+							category: newCategory,
 							$continue: _elm_lang$core$Maybe$Nothing,
 							pages: _Skinney$elm_array_exploration$Array_Hamt$empty,
 							subCategories: {ctor: '[]'}
 						}),
-					_1: A2(_mmachenry$whats_a_word_that$Main$getCategoryMembers, model.category, _elm_lang$core$Maybe$Nothing)
+					_1: A2(_mmachenry$whats_a_word_that$Main$getCategoryMembers, newCategory, _elm_lang$core$Maybe$Nothing)
 				};
 			case 'LoadMore':
 				return _mmachenry$whats_a_word_that$Main$loadMore(model);
@@ -10324,20 +10317,20 @@ var _mmachenry$whats_a_word_that$Main$update = F2(
 				return _mmachenry$whats_a_word_that$Main$loadMore(
 					_elm_lang$core$Native_Utils.update(
 						model,
-						{visible: _p4._0._1}));
+						{visible: _p3._0._1}));
 			default:
-				if (_p4._0.ctor === 'Err') {
+				if (_p3._0.ctor === 'Err') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								error: _elm_lang$core$Maybe$Just(_p4._0._0)
+								error: _elm_lang$core$Maybe$Just(_p3._0._0)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				} else {
-					var _p5 = _p4._0._0;
+					var _p4 = _p3._0._0;
 					var namespace = F2(
 						function (i, page) {
 							return _elm_lang$core$Native_Utils.eq(page.ns, i);
@@ -10345,22 +10338,22 @@ var _mmachenry$whats_a_word_that$Main$update = F2(
 					var newPages = A2(
 						_elm_lang$core$List$filter,
 						function (p) {
-							return !A2(_elm_lang$core$String$startsWith, 'List of', p.title);
+							return !(A2(_elm_lang$core$String$startsWith, 'Lists of ', p.title) || A2(_elm_lang$core$String$startsWith, 'List of ', p.title));
 						},
 						A2(
 							_elm_lang$core$List$filter,
 							namespace(0),
-							_p5.pages));
+							_p4.pages));
 					var newSubCats = A2(
 						_elm_lang$core$List$filter,
 						namespace(14),
-						_p5.pages);
+						_p4.pages);
 					return _mmachenry$whats_a_word_that$Main$loadMore(
 						_elm_lang$core$Native_Utils.update(
 							model,
 							{
 								error: _elm_lang$core$Maybe$Nothing,
-								$continue: _p5.cmcontinue,
+								$continue: _p4.cmcontinue,
 								pages: A2(
 									_Skinney$elm_array_exploration$Array_Hamt$append,
 									model.pages,
@@ -10492,50 +10485,64 @@ var _mmachenry$whats_a_word_that$Main$view = function (model) {
 		{
 			ctor: '::',
 			_0: A2(
-				_elm_lang$html$Html$input,
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$placeholder('category'),
+					_0: A2(
+						_elm_lang$html$Html$input,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$placeholder('category'),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Events$onInput(_mmachenry$whats_a_word_that$Main$UpdateCategory),
+								_1: {ctor: '[]'}
+							}
+						},
+						{ctor: '[]'}),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$html$Html_Events$onInput(_mmachenry$whats_a_word_that$Main$UpdateCategory),
+						_0: A2(
+							_elm_lang$html$Html$button,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Events$onClick(_mmachenry$whats_a_word_that$Main$Search),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('search'),
+								_1: {ctor: '[]'}
+							}),
 						_1: {ctor: '[]'}
 					}
-				},
-				{ctor: '[]'}),
+				}),
 			_1: {
 				ctor: '::',
 				_0: A2(
-					_elm_lang$html$Html$input,
+					_elm_lang$html$Html$div,
+					{ctor: '[]'},
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$placeholder('regex'),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$html$Html_Events$onInput(_mmachenry$whats_a_word_that$Main$UpdateRegex),
-							_1: {ctor: '[]'}
-						}
-					},
-					{ctor: '[]'}),
+						_0: A2(
+							_elm_lang$html$Html$input,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$placeholder('regex'),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onInput(_mmachenry$whats_a_word_that$Main$UpdateRegex),
+									_1: {ctor: '[]'}
+								}
+							},
+							{ctor: '[]'}),
+						_1: {ctor: '[]'}
+					}),
 				_1: {
 					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$button,
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html_Events$onClick(_mmachenry$whats_a_word_that$Main$Search),
-							_1: {ctor: '[]'}
-						},
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html$text('search'),
-							_1: {ctor: '[]'}
-						}),
-					_1: {
-						ctor: '::',
-						_0: _mmachenry$whats_a_word_that$Main$viewResults(model),
-						_1: {ctor: '[]'}
-					}
+					_0: _mmachenry$whats_a_word_that$Main$viewResults(model),
+					_1: {ctor: '[]'}
 				}
 			}
 		});

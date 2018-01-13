@@ -19,6 +19,7 @@ main = Html.program {
     subscriptions = subscriptions }
 
 type alias Model = {
+    categoryInput : String,
     category : String,
     regex : String,
     error : Maybe Http.Error,
@@ -42,6 +43,7 @@ type alias WikiPage = {
 init : (Model, Cmd Msg)
 init =
     let model = {
+        categoryInput = "",
         category = "",
         regex = "",
         error = Nothing,
@@ -61,31 +63,38 @@ type Msg =
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = case msg of
-    UpdateCategory str -> ({ model | category = str }, Cmd.none)
+    UpdateCategory str -> ({ model | categoryInput = str }, Cmd.none)
     UpdateRegex str -> ({ model | regex = str }, Cmd.none)
     Search ->
-        ({model | continue = Nothing, pages = Array.empty, subCategories = []},
-         getCategoryMembers model.category Nothing)
+        let newCategory = "Category:" ++ model.categoryInput
+        in ({model |
+                category = newCategory,
+                continue = Nothing,
+                pages = Array.empty,
+                subCategories = []},
+            getCategoryMembers newCategory Nothing)
     LoadMore -> loadMore model
     UpdateVisibility (elementId, shown) -> loadMore { model | visible = shown }
     UpdateResults (Err err) -> ({ model | error = Just err }, Cmd.none)
     UpdateResults (Ok result) ->
         let namespace i page = page.ns == i
             newPages =
-                List.filter (\p->not (String.startsWith "List of" p.title))
+                List.filter (\p->not (String.startsWith "Lists of " p.title
+                                      || String.startsWith "List of " p.title))
                     (List.filter (namespace 0) result.pages)
             newSubCats = List.filter (namespace 14) result.pages
         in loadMore { model |
                error = Nothing,
                continue = result.cmcontinue,
                pages = Array.append model.pages (Array.fromList newPages),
-               subCategories = List.append model.subCategories newSubCats}
+               subCategories = List.append model.subCategories newSubCats }
 
 view : Model -> Html Msg
 view model = div [] [
-    input [ placeholder "category", onInput UpdateCategory ] [],
-    input [ placeholder "regex", onInput UpdateRegex ] [],
-    button [ onClick Search ] [ text "search" ],
+    div [] [
+        input [ placeholder "category", onInput UpdateCategory ] [],
+        button [ onClick Search ] [ text "search" ]],
+    div [] [ input [ placeholder "regex", onInput UpdateRegex ] []],
     --div [] [text (toString model)],
     viewResults model
     ]
@@ -123,8 +132,7 @@ getCategoryMembers category continue =
         (case continue of
             Just str -> "cmcontinue=" ++ str ++ "&"
             Nothing -> "") ++
-        "cmtitle=Category:" ++
-            Regex.replace Regex.All (Regex.regex " ") (\_->"_") category
+        "cmtitle=" ++ category
     in Http.send UpdateResults (Http.get url categoryList)
 
 loadMore : Model -> (Model, Cmd Msg)
