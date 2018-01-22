@@ -16156,7 +16156,11 @@ var _mmachenry$whats_a_word_that$Main$viewResults = function (model) {
 								_elm_lang$core$Basics_ops['++'],
 								_mmachenry$whats_a_word_that$Main$baseUrl,
 								A2(_elm_lang$core$Basics_ops['++'], '/wiki/', page.title))),
-						_1: {ctor: '[]'}
+						_1: {
+							ctor: '::',
+							_0: _rtfeldman$elm_css$Html_Styled_Attributes$target('_blank'),
+							_1: {ctor: '[]'}
+						}
 					},
 					{
 						ctor: '::',
