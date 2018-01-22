@@ -1,20 +1,27 @@
 port module Main exposing (main)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Json
 import Regex
 import Array.Hamt exposing (Array)
 import Array.Hamt as Array
 
+import Css
+
+import Html
+import Html.Styled exposing (..)
+import Html.Styled.Attributes exposing (..)
+import Html.Styled.Events exposing (onClick, onInput)
+
+baseUrl = "https://en.wikipedia.org/wiki/"
+-- baseUrl = "http://transformersprime.wikia.com/wiki/"
+
 port observe : String -> Cmd msg
 port onVisible : ((String, Bool) -> msg) -> Sub msg
 
 main = Html.program {
     init = init,
-    view = view,
+    view = (view >> toUnstyled),
     update = update,
     subscriptions = subscriptions }
 
@@ -90,10 +97,39 @@ update msg model = case msg of
                subCategories = List.append model.subCategories newSubCats }
 
 view : Model -> Html Msg
-view model = div [] [
-    div [] [
-        input [ placeholder "category", onInput UpdateCategory ] [],
-        button [ onClick Search ] [ text "search" ]],
+view model =
+  div [
+      css [
+          Css.margin (Css.pct 5)
+          ]
+      ] [
+    h1 [] [ text "What's a word that... ?" ],
+    div [
+        css [
+            Css.displayFlex,
+            Css.justifyContent Css.spaceBetween,
+            Css.alignItems Css.stretch,
+            Css.height (Css.px 40)
+            ]
+        ] [
+        input [ placeholder "category",
+                onInput UpdateCategory,
+                css [
+                    --Css.height (Css.px 25),
+                    Css.flexGrow (Css.num 3),
+                    Css.fontSize (Css.px 16),
+                    Css.padding (Css.px 5),
+                    Css.marginRight (Css.px 10)
+                    ]
+                ] [],
+        button [ onClick Search,
+                 disabled (model.categoryInput == ""),
+                 css [
+                     --Css.height (Css.px 35)
+                     ]
+                 ]
+               [ text "search" ]],
+    div [ hidden (model.error == Nothing) ] [ text (toString model.error) ],
     div [] [ input [ placeholder "regex", onInput UpdateRegex ] []],
     --div [] [text (toString model)],
     viewResults model
@@ -105,7 +141,7 @@ viewResults model =
         matches = Array.filter (\p->Regex.contains regex p.title)
                                 model.pages
         mkListItem page =
-            li [] [a [href ("https://en.wikipedia.org/wiki/" ++ page.title)]
+            li [] [a [href (baseUrl ++ page.title)]
                      [text page.title]]
     in div [] [
         div [] [ text <| (toString (Array.length model.pages)) ++
@@ -123,7 +159,7 @@ subscriptions model = onVisible UpdateVisibility
 getCategoryMembers : String -> Maybe String -> Cmd Msg
 getCategoryMembers category continue =
     let url =
-        "https://en.wikipedia.org/w/api.php?" ++
+        baseUrl ++
         "action=query&" ++
         "list=categorymembers&" ++
         "cmlimit=500&" ++
