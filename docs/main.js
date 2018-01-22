@@ -16263,7 +16263,17 @@ var _mmachenry$whats_a_word_that$Main$view = function (model) {
 			ctor: '::',
 			_0: A2(
 				_rtfeldman$elm_css$Html_Styled$h1,
-				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _rtfeldman$elm_css$Html_Styled_Attributes$css(
+						{
+							ctor: '::',
+							_0: _rtfeldman$elm_css$Css$fontSize(
+								_rtfeldman$elm_css$Css$px(28)),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				},
 				{
 					ctor: '::',
 					_0: _rtfeldman$elm_css$Html_Styled$text('What\'s a word that... ?'),
@@ -16382,18 +16392,58 @@ var _mmachenry$whats_a_word_that$Main$view = function (model) {
 						ctor: '::',
 						_0: A2(
 							_rtfeldman$elm_css$Html_Styled$div,
-							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: _rtfeldman$elm_css$Html_Styled_Attributes$css(
+									{
+										ctor: '::',
+										_0: _rtfeldman$elm_css$Css$displayFlex,
+										_1: {
+											ctor: '::',
+											_0: _rtfeldman$elm_css$Css$alignItems(_rtfeldman$elm_css$Css$stretch),
+											_1: {
+												ctor: '::',
+												_0: _rtfeldman$elm_css$Css$height(
+													_rtfeldman$elm_css$Css$px(40)),
+												_1: {
+													ctor: '::',
+													_0: A2(
+														_rtfeldman$elm_css$Css$margin2,
+														_rtfeldman$elm_css$Css$px(10),
+														_rtfeldman$elm_css$Css$px(0)),
+													_1: {ctor: '[]'}
+												}
+											}
+										}
+									}),
+								_1: {ctor: '[]'}
+							},
 							{
 								ctor: '::',
 								_0: A2(
 									_rtfeldman$elm_css$Html_Styled$input,
 									{
 										ctor: '::',
-										_0: _rtfeldman$elm_css$Html_Styled_Attributes$placeholder('regex'),
+										_0: _rtfeldman$elm_css$Html_Styled_Attributes$css(
+											{
+												ctor: '::',
+												_0: _rtfeldman$elm_css$Css$width(
+													_rtfeldman$elm_css$Css$pct(100)),
+												_1: {
+													ctor: '::',
+													_0: _rtfeldman$elm_css$Css$fontSize(
+														_rtfeldman$elm_css$Css$px(16)),
+													_1: {ctor: '[]'}
+												}
+											}),
 										_1: {
 											ctor: '::',
-											_0: _rtfeldman$elm_css$Html_Styled_Events$onInput(_mmachenry$whats_a_word_that$Main$UpdateRegex),
-											_1: {ctor: '[]'}
+											_0: _rtfeldman$elm_css$Html_Styled_Attributes$placeholder('regex'),
+											_1: {
+												ctor: '::',
+												_0: _rtfeldman$elm_css$Html_Styled_Events$onInput(_mmachenry$whats_a_word_that$Main$UpdateRegex),
+												_1: {ctor: '[]'}
+											}
 										}
 									},
 									{ctor: '[]'}),

@@ -1,17 +1,15 @@
 port module Main exposing (main)
 
+import Css
+import Html
+import Html.Styled exposing (..)
+import Html.Styled.Attributes exposing (..)
+import Html.Styled.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Json
 import Regex
 import Array.Hamt exposing (Array)
 import Array.Hamt as Array
-
-import Css
-
-import Html
-import Html.Styled exposing (..)
-import Html.Styled.Attributes exposing (..)
-import Html.Styled.Events exposing (onClick, onInput)
 
 baseUrl = "https://en.wikipedia.org/wiki/"
 -- baseUrl = "http://transformersprime.wikia.com/wiki/"
@@ -103,7 +101,7 @@ view model =
           Css.margin (Css.pct 5)
           ]
       ] [
-    h1 [] [ text "What's a word that... ?" ],
+    h1 [ css [ Css.fontSize (Css.px 28) ]] [ text "What's a word that... ?" ],
     div [
         css [
             Css.displayFlex,
@@ -115,7 +113,6 @@ view model =
         input [ placeholder "category",
                 onInput UpdateCategory,
                 css [
-                    --Css.height (Css.px 25),
                     Css.flexGrow (Css.num 3),
                     Css.fontSize (Css.px 16),
                     Css.padding (Css.px 5),
@@ -125,13 +122,26 @@ view model =
         button [ onClick Search,
                  disabled (model.categoryInput == ""),
                  css [
-                     --Css.height (Css.px 35)
+                     --Css.height (Css.rem 35)
                      ]
                  ]
                [ text "search" ]],
     div [ hidden (model.error == Nothing) ] [ text (toString model.error) ],
-    div [] [ input [ placeholder "regex", onInput UpdateRegex ] []],
-    --div [] [text (toString model)],
+    div [
+        css [
+            Css.displayFlex,
+            Css.alignItems Css.stretch,
+            Css.height (Css.px 40),
+            Css.margin2 (Css.px 10) (Css.px 0)
+            ]
+        ] [
+        input [
+            css [
+                Css.width (Css.pct 100),
+                Css.fontSize (Css.px 16)
+                ],
+            placeholder "regex", onInput UpdateRegex
+            ] []],
     viewResults model
     ]
 
