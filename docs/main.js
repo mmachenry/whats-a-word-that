@@ -15904,7 +15904,7 @@ var _rtfeldman$elm_css$Html_Styled_Events$Options = F2(
 		return {stopPropagation: a, preventDefault: b};
 	});
 
-var _mmachenry$whats_a_word_that$Main$baseUrl = 'https://en.wikipedia.org/wiki/';
+var _mmachenry$whats_a_word_that$Main$baseUrl = 'https://en.wikipedia.org';
 var _mmachenry$whats_a_word_that$Main$observe = _elm_lang$core$Native_Platform.outgoingPort(
 	'observe',
 	function (v) {
@@ -15982,33 +15982,36 @@ var _mmachenry$whats_a_word_that$Main$getCategoryMembers = F2(
 			_mmachenry$whats_a_word_that$Main$baseUrl,
 			A2(
 				_elm_lang$core$Basics_ops['++'],
-				'action=query&',
+				'/w/api.php?',
 				A2(
 					_elm_lang$core$Basics_ops['++'],
-					'list=categorymembers&',
+					'action=query&',
 					A2(
 						_elm_lang$core$Basics_ops['++'],
-						'cmlimit=500&',
+						'list=categorymembers&',
 						A2(
 							_elm_lang$core$Basics_ops['++'],
-							'origin=*&',
+							'cmlimit=500&',
 							A2(
 								_elm_lang$core$Basics_ops['++'],
-								'format=json&',
+								'origin=*&',
 								A2(
 									_elm_lang$core$Basics_ops['++'],
-									function () {
-										var _p0 = $continue;
-										if (_p0.ctor === 'Just') {
-											return A2(
-												_elm_lang$core$Basics_ops['++'],
-												'cmcontinue=',
-												A2(_elm_lang$core$Basics_ops['++'], _p0._0, '&'));
-										} else {
-											return '';
-										}
-									}(),
-									A2(_elm_lang$core$Basics_ops['++'], 'cmtitle=', category))))))));
+									'format=json&',
+									A2(
+										_elm_lang$core$Basics_ops['++'],
+										function () {
+											var _p0 = $continue;
+											if (_p0.ctor === 'Just') {
+												return A2(
+													_elm_lang$core$Basics_ops['++'],
+													'cmcontinue=',
+													A2(_elm_lang$core$Basics_ops['++'], _p0._0, '&'));
+											} else {
+												return '';
+											}
+										}(),
+										A2(_elm_lang$core$Basics_ops['++'], 'cmtitle=', category)))))))));
 		return A2(
 			_elm_lang$http$Http$send,
 			_mmachenry$whats_a_word_that$Main$UpdateResults,
@@ -16149,7 +16152,10 @@ var _mmachenry$whats_a_word_that$Main$viewResults = function (model) {
 					{
 						ctor: '::',
 						_0: _rtfeldman$elm_css$Html_Styled_Attributes$href(
-							A2(_elm_lang$core$Basics_ops['++'], _mmachenry$whats_a_word_that$Main$baseUrl, page.title)),
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								_mmachenry$whats_a_word_that$Main$baseUrl,
+								A2(_elm_lang$core$Basics_ops['++'], '/wiki/', page.title))),
 						_1: {ctor: '[]'}
 					},
 					{

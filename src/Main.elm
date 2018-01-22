@@ -11,8 +11,8 @@ import Regex
 import Array.Hamt exposing (Array)
 import Array.Hamt as Array
 
-baseUrl = "https://en.wikipedia.org/wiki/"
--- baseUrl = "http://transformersprime.wikia.com/wiki/"
+baseUrl = "https://en.wikipedia.org"
+-- baseUrl = "http://transformersprime.wikia.com/wiki/api.php?"
 
 port observe : String -> Cmd msg
 port onVisible : ((String, Bool) -> msg) -> Sub msg
@@ -151,7 +151,7 @@ viewResults model =
         matches = Array.filter (\p->Regex.contains regex p.title)
                                 model.pages
         mkListItem page =
-            li [] [a [href (baseUrl ++ page.title)]
+            li [] [a [href (baseUrl ++ "/wiki/" ++ page.title)]
                      [text page.title]]
     in div [] [
         div [] [ text <| (toString (Array.length model.pages)) ++
@@ -170,6 +170,7 @@ getCategoryMembers : String -> Maybe String -> Cmd Msg
 getCategoryMembers category continue =
     let url =
         baseUrl ++
+        "/w/api.php?" ++
         "action=query&" ++
         "list=categorymembers&" ++
         "cmlimit=500&" ++
