@@ -151,7 +151,7 @@ viewResults model =
         matches = Array.filter (\p->Regex.contains regex p.title)
                                 model.pages
         mkListItem page =
-            li [] [a [href (baseUrl ++ "/wiki/" ++ page.title)]
+            li [] [a [href (baseUrl ++ "/wiki/" ++ page.title), target "_blank"]
                      [text page.title]]
     in div [] [
         div [] [ text <| (toString (Array.length model.pages)) ++
