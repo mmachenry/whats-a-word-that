@@ -10,9 +10,10 @@ import Json.Decode as Json
 import Regex
 import Array.Hamt exposing (Array)
 import Array.Hamt as Array
+import Autocomplete
 
-baseUrl = "https://en.wikipedia.org"
--- baseUrl = "http://transformersprime.wikia.com/wiki/api.php?"
+wikiHost = "en.wikipedia.org"
+-- wikiHost = "transformersprime.wikia.com"
 
 port observe : String -> Cmd msg
 port onVisible : ((String, Bool) -> msg) -> Sub msg
@@ -31,7 +32,9 @@ type alias Model = {
     visible : Bool,
     continue : Maybe String,
     pages : Array WikiPage,
-    subCategories : List WikiPage
+    subCategories : List WikiPage,
+    autoState : Autocomplete.State,
+    possibleCategories : List String
     }
 
 type alias CategoryList = {
@@ -55,7 +58,9 @@ init =
         visible = False,
         continue = Nothing,
         pages = Array.empty,
-        subCategories = [] }
+        subCategories = [],
+        autoState = Autocomplete.empty,
+        possibleCategories = [] }
     in (model, observe "#loadBtn")
 
 type Msg =
@@ -65,6 +70,7 @@ type Msg =
     | LoadMore
     | UpdateVisibility (String, Bool)
     | UpdateResults (Result Http.Error CategoryList)
+    | SetAutoState Autocomplete.Msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = case msg of
@@ -93,6 +99,7 @@ update msg model = case msg of
                continue = result.cmcontinue,
                pages = Array.append model.pages (Array.fromList newPages),
                subCategories = List.append model.subCategories newSubCats }
+    SetAutoState autoMsg -> (model, Cmd.none)
 
 view : Model -> Html Msg
 view model =
@@ -122,7 +129,6 @@ view model =
         button [ onClick Search,
                  disabled (model.categoryInput == ""),
                  css [
-                     --Css.height (Css.rem 35)
                      ]
                  ]
                [ text "search" ]],
@@ -151,7 +157,8 @@ viewResults model =
         matches = Array.filter (\p->Regex.contains regex p.title)
                                 model.pages
         mkListItem page =
-            li [] [a [href (baseUrl ++ "/wiki/" ++ page.title), target "_blank"]
+            li [] [a [href (mkUrl wikiHost ("/wiki/" ++ page.title) []),
+                      target "_blank"]
                      [text page.title]]
     in div [] [
         div [] [ text <| (toString (Array.length model.pages)) ++
@@ -164,23 +171,30 @@ viewResults model =
             [button [onClick LoadMore] [text "Load more..."]]]
 
 subscriptions : Model -> Sub Msg
-subscriptions model = onVisible UpdateVisibility
+subscriptions model =
+    Sub.batch [
+        onVisible UpdateVisibility,
+        Sub.map SetAutoState Autocomplete.subscription
+        ]
 
 getCategoryMembers : String -> Maybe String -> Cmd Msg
 getCategoryMembers category continue =
-    let url =
-        baseUrl ++
-        "/w/api.php?" ++
-        "action=query&" ++
-        "list=categorymembers&" ++
-        "cmlimit=500&" ++
-        "origin=*&" ++
-        "format=json&" ++
-        (case continue of
-            Just str -> "cmcontinue=" ++ str ++ "&"
-            Nothing -> "") ++
-        "cmtitle=" ++ category
+    let args = [
+          ("action","query"),
+          ("list","categorymembers"),
+          ("cmlimit","500"),
+          ("origin","*"),
+          ("format","json"),
+          ("cmtitle",category)]
+        url = mkUrl wikiHost "/w/api.php?" (case continue of
+                Just str -> ("cmcontinue",str) :: args
+                Nothing -> args)
     in Http.send UpdateResults (Http.get url categoryList)
+
+mkUrl : String -> String -> List (String, String) -> String
+mkUrl host page args =
+    let argStr = String.join "&" (List.map (\(n,v)-> n ++ "=" ++ v) args)
+    in host ++ page ++ argStr
 
 loadMore : Model -> (Model, Cmd Msg)
 loadMore model =
