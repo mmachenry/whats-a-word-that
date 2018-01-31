@@ -194,7 +194,7 @@ getCategoryMembers category continue =
 mkUrl : String -> String -> List (String, String) -> String
 mkUrl host page args =
     let argStr = String.join "&" (List.map (\(n,v)-> n ++ "=" ++ v) args)
-    in host ++ page ++ argStr
+    in "https://" ++ host ++ page ++ argStr
 
 loadMore : Model -> (Model, Cmd Msg)
 loadMore model =

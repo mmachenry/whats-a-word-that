@@ -17286,8 +17286,11 @@ var _mmachenry$whats_a_word_that$Main$mkUrl = F3(
 				args));
 		return A2(
 			_elm_lang$core$Basics_ops['++'],
-			host,
-			A2(_elm_lang$core$Basics_ops['++'], page, argStr));
+			'https://',
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				host,
+				A2(_elm_lang$core$Basics_ops['++'], page, argStr)));
 	});
 var _mmachenry$whats_a_word_that$Main$wikiHost = 'en.wikipedia.org';
 var _mmachenry$whats_a_word_that$Main$observe = _elm_lang$core$Native_Platform.outgoingPort(
