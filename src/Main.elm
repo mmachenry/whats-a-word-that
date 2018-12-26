@@ -32,9 +32,7 @@ type alias Model = {
     visible : Bool,
     continue : Maybe String,
     pages : Array WikiPage,
-    subCategories : List WikiPage,
-    autoState : Autocomplete.State,
-    possibleCategories : List String
+    subCategories : List WikiPage
     }
 
 type alias CategoryList = {
@@ -58,9 +56,7 @@ init =
         visible = False,
         continue = Nothing,
         pages = Array.empty,
-        subCategories = [],
-        autoState = Autocomplete.empty,
-        possibleCategories = [] }
+        subCategories = [] }
     in (model, observe "#loadBtn")
 
 type Msg =
@@ -70,7 +66,6 @@ type Msg =
     | LoadMore
     | UpdateVisibility (String, Bool)
     | UpdateResults (Result Http.Error CategoryList)
-    | SetAutoState Autocomplete.Msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = case msg of
@@ -99,7 +94,6 @@ update msg model = case msg of
                continue = result.cmcontinue,
                pages = Array.append model.pages (Array.fromList newPages),
                subCategories = List.append model.subCategories newSubCats }
-    SetAutoState autoMsg -> (model, Cmd.none)
 
 view : Model -> Html Msg
 view model =
@@ -173,8 +167,7 @@ viewResults model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch [
-        onVisible UpdateVisibility,
-        Sub.map SetAutoState Autocomplete.subscription
+        onVisible UpdateVisibility
         ]
 
 getCategoryMembers : String -> Maybe String -> Cmd Msg
