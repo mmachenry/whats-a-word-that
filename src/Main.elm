@@ -10,7 +10,6 @@ import Json.Decode as Json
 import Regex
 import Array.Hamt exposing (Array)
 import Array.Hamt as Array
-import Autocomplete
 
 wikiHost = "en.wikipedia.org"
 -- wikiHost = "transformersprime.wikia.com"
