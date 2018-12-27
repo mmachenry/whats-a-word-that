@@ -1,15 +1,14 @@
 port module Main exposing (main)
 
-import Css
-import Html
-import Html.Styled exposing (..)
-import Html.Styled.Attributes exposing (..)
-import Html.Styled.Events exposing (onClick, onInput)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (onClick, onInput)
+import Browser
 import Http
 import Json.Decode as Json
 import Regex
-import Array.Hamt exposing (Array)
-import Array.Hamt as Array
+import Array exposing (Array)
+import Debug exposing (toString)
 
 wikiHost = "en.wikipedia.org"
 -- wikiHost = "transformersprime.wikia.com"
@@ -17,9 +16,9 @@ wikiHost = "en.wikipedia.org"
 port observe : String -> Cmd msg
 port onVisible : ((String, Bool) -> msg) -> Sub msg
 
-main = Html.program {
+main = Browser.element {
     init = init,
-    view = (view >> toUnstyled),
+    view = view,
     update = update,
     subscriptions = subscriptions }
 
@@ -34,6 +33,8 @@ type alias Model = {
     subCategories : List WikiPage
     }
 
+type alias Flags = {}
+
 type alias CategoryList = {
     cmcontinue : Maybe String,
     pages : List WikiPage
@@ -45,18 +46,19 @@ type alias WikiPage = {
     title : String
     }
 
-init : (Model, Cmd Msg)
-init =
-    let model = {
-        categoryInput = "",
-        category = "",
-        regex = "",
-        error = Nothing,
-        visible = False,
-        continue = Nothing,
-        pages = Array.empty,
-        subCategories = [] }
-    in (model, observe "#loadBtn")
+initModel = {
+    categoryInput = "",
+    category = "",
+    regex = "",
+    error = Nothing,
+    visible = False,
+    continue = Nothing,
+    pages = Array.empty,
+    subCategories = []
+    }
+
+init : Flags -> (Model, Cmd Msg)
+init _ = (initModel, observe "#loadBtn")
 
 type Msg =
       UpdateCategory String
@@ -96,59 +98,44 @@ update msg model = case msg of
 
 view : Model -> Html Msg
 view model =
-  div [
-      css [
-          Css.margin (Css.pct 5)
-          ]
-      ] [
-    h1 [ css [ Css.fontSize (Css.px 28) ]] [ text "What's a word that... ?" ],
-    div [
-        css [
-            Css.displayFlex,
-            Css.justifyContent Css.spaceBetween,
-            Css.alignItems Css.stretch,
-            Css.height (Css.px 40)
-            ]
-        ] [
-        input [ placeholder "category",
-                onInput UpdateCategory,
-                css [
-                    Css.flexGrow (Css.num 3),
-                    Css.fontSize (Css.px 16),
-                    Css.padding (Css.px 5),
-                    Css.marginRight (Css.px 10)
-                    ]
-                ] [],
-        button [ onClick Search,
-                 disabled (model.categoryInput == ""),
-                 css [
-                     ]
-                 ]
-               [ text "search" ]],
-    div [ hidden (model.error == Nothing) ] [ text (toString model.error) ],
-    div [
-        css [
-            Css.displayFlex,
-            Css.alignItems Css.stretch,
-            Css.height (Css.px 40),
-            Css.margin2 (Css.px 10) (Css.px 0)
-            ]
-        ] [
-        input [
-            css [
-                Css.width (Css.pct 100),
-                Css.fontSize (Css.px 16)
-                ],
-            placeholder "regex", onInput UpdateRegex
-            ] []],
-    viewResults model
+    div [ style "margin" "5%" ] [
+        h1 [ style "font-size" "28px" ]
+           [ text "What's a word that... ?" ],
+        div [ style "display" "flex",
+              style "justify-content" "space-between",
+              style "align-items" "stretch",
+              style "height" "40px" ] [
+            input [ placeholder "category",
+                    onInput UpdateCategory,
+                    style "flex-grow" "3",
+                    style "font-size" "16px",
+                    style "padding" "5px",
+                    style "margin-right" "10px"
+                    ] [],
+            button [ onClick Search,
+                     disabled (model.categoryInput == "") ]
+                   [ text "search" ]],
+        div [ hidden (model.error == Nothing) ]
+            [ text (toString model.error) ],
+        div [ style "display" "flex",
+              style "align-items" "stretch",
+              style "height" "40px",
+              style "margin2" "10px 0px" ] [
+            input [
+                placeholder "regex",
+                style "width" "100%",
+                style "font-size" "16px",
+                onInput UpdateRegex
+                ] []],
+        viewResults model
     ]
 
 viewResults : Model -> Html Msg
 viewResults model =
-    let regex = Regex.regex model.regex
-        matches = Array.filter (\p->Regex.contains regex p.title)
-                                model.pages
+    let matches = case Regex.fromString model.regex of
+            Nothing -> model.pages
+            Just regex -> Array.filter (\p->Regex.contains regex p.title)
+                                       model.pages
         mkListItem page =
             li [] [a [href (mkUrl wikiHost ("/wiki/" ++ page.title) []),
                       target "_blank"]
@@ -181,7 +168,10 @@ getCategoryMembers category continue =
         url = mkUrl wikiHost "/w/api.php?" (case continue of
                 Just str -> ("cmcontinue",str) :: args
                 Nothing -> args)
-    in Http.send UpdateResults (Http.get url categoryList)
+    in Http.get {
+           url = url,
+           expect = Http.expectJson UpdateResults categoryList
+       }
 
 mkUrl : String -> String -> List (String, String) -> String
 mkUrl host page args =
