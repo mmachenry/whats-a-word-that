@@ -3,6 +3,7 @@ port module Main exposing (main)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
+import Html.Events.Extra exposing (onEnter)
 import Browser
 import Http
 import Json.Decode as Json
@@ -108,9 +109,11 @@ view model =
         div [ style "display" "flex",
               style "justify-content" "space-between",
               style "align-items" "stretch",
-              style "height" "40px" ] [
+              style "height" "40px",
+              style "margin-bottom" "13px"] [
             input [ placeholder "category",
                     onInput UpdateCategory,
+                    onEnter Search,
                     style "flex-grow" "3",
                     style "font-size" "16px",
                     style "padding" "5px",
@@ -131,7 +134,7 @@ view model =
                 style "font-size" "16px",
                 onInput UpdateRegex
                 ] [],
-            label [] [
+            label [ style "padding-left" "10px"] [
                 input [
                   type_ "checkbox",
                   checked model.caseSensitive,
@@ -163,13 +166,23 @@ viewResults model =
                                        model.pages
         mkListItem page =
             li [] [a [href (mkUrl wikiHost ("/wiki/" ++ page.title) []),
-                      target "_blank"]
+                      target "_blank",
+                      style "color" "black"]
                      [text page.title]]
     in div [] [
-        div [] [ text <| (toString (Array.length model.pages)) ++
-                         " loaded / " ++
-                         (toString (Array.length matches)) ++ " matches" ],
-        ol [] (List.map mkListItem (Array.toList matches)),
+        div [ style "margin-top" "4px",
+              style "font-size" "13px",
+              style "font-family" "Helvetica, Arial, sans-serif",
+              style "color" "#999"
+            ] [ text <|
+                         (toString (Array.length matches)) ++ " matches / " ++
+                         (toString (Array.length model.pages)) ++
+                         " loaded" ],
+        ol [ style "color" "#999",
+             style "font-family" "'PT Mono', monospace",
+             style "line-height" "1.6",
+             style "font-size" "13px"
+        ] (List.map mkListItem (Array.toList matches)),
         div [id "loadBtn",
              hidden (model.continue == Nothing &&
                      List.length model.subCategories == 0)]

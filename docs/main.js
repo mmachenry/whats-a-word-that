@@ -6556,6 +6556,8 @@ var elm$html$Html$Attributes$href = function (url) {
 		_VirtualDom_noJavaScriptUri(url));
 };
 var elm$html$Html$Attributes$id = elm$html$Html$Attributes$stringProperty('id');
+var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
 var elm$html$Html$Attributes$target = elm$html$Html$Attributes$stringProperty('target');
 var elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
@@ -6588,7 +6590,8 @@ var author$project$Main$viewResults = function (model) {
 						[
 							elm$html$Html$Attributes$href(
 							A3(author$project$Main$mkUrl, author$project$Main$wikiHost, '/wiki/' + page.title, _List_Nil)),
-							elm$html$Html$Attributes$target('_blank')
+							elm$html$Html$Attributes$target('_blank'),
+							A2(elm$html$Html$Attributes$style, 'color', 'black')
 						]),
 					_List_fromArray(
 						[
@@ -6617,17 +6620,29 @@ var author$project$Main$viewResults = function (model) {
 			[
 				A2(
 				elm$html$Html$div,
-				_List_Nil,
+				_List_fromArray(
+					[
+						A2(elm$html$Html$Attributes$style, 'margin-top', '4px'),
+						A2(elm$html$Html$Attributes$style, 'font-size', '13px'),
+						A2(elm$html$Html$Attributes$style, 'font-family', 'Helvetica, Arial, sans-serif'),
+						A2(elm$html$Html$Attributes$style, 'color', '#999')
+					]),
 				_List_fromArray(
 					[
 						elm$html$Html$text(
 						elm$core$Debug$toString(
-							elm$core$Array$length(model.pages)) + (' loaded / ' + (elm$core$Debug$toString(
-							elm$core$Array$length(matches)) + ' matches')))
+							elm$core$Array$length(matches)) + (' matches / ' + (elm$core$Debug$toString(
+							elm$core$Array$length(model.pages)) + ' loaded')))
 					])),
 				A2(
 				elm$html$Html$ol,
-				_List_Nil,
+				_List_fromArray(
+					[
+						A2(elm$html$Html$Attributes$style, 'color', '#999'),
+						A2(elm$html$Html$Attributes$style, 'font-family', '\'PT Mono\', monospace'),
+						A2(elm$html$Html$Attributes$style, 'line-height', '1.6'),
+						A2(elm$html$Html$Attributes$style, 'font-size', '13px')
+					]),
 				A2(
 					elm$core$List$map,
 					mkListItem,
@@ -6661,8 +6676,6 @@ var elm$html$Html$label = _VirtualDom_node('label');
 var elm$html$Html$Attributes$checked = elm$html$Html$Attributes$boolProperty('checked');
 var elm$html$Html$Attributes$disabled = elm$html$Html$Attributes$boolProperty('disabled');
 var elm$html$Html$Attributes$placeholder = elm$html$Html$Attributes$stringProperty('placeholder');
-var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
 var elm$html$Html$Attributes$type_ = elm$html$Html$Attributes$stringProperty('type');
 var elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
@@ -6695,6 +6708,20 @@ var elm$html$Html$Events$onInput = function (tagger) {
 			elm$html$Html$Events$alwaysStop,
 			A2(elm$json$Json$Decode$map, tagger, elm$html$Html$Events$targetValue)));
 };
+var elm$html$Html$Events$keyCode = A2(elm$json$Json$Decode$field, 'keyCode', elm$json$Json$Decode$int);
+var elm$json$Json$Decode$fail = _Json_fail;
+var elm_community$html_extra$Html$Events$Extra$onEnter = function (onEnterAction) {
+	return A2(
+		elm$html$Html$Events$on,
+		'keyup',
+		A2(
+			elm$json$Json$Decode$andThen,
+			function (keyCode) {
+				return (keyCode === 13) ? elm$json$Json$Decode$succeed(onEnterAction) : elm$json$Json$Decode$fail(
+					elm$core$String$fromInt(keyCode));
+			},
+			elm$html$Html$Events$keyCode));
+};
 var author$project$Main$view = function (model) {
 	return A2(
 		elm$html$Html$div,
@@ -6721,7 +6748,8 @@ var author$project$Main$view = function (model) {
 						A2(elm$html$Html$Attributes$style, 'display', 'flex'),
 						A2(elm$html$Html$Attributes$style, 'justify-content', 'space-between'),
 						A2(elm$html$Html$Attributes$style, 'align-items', 'stretch'),
-						A2(elm$html$Html$Attributes$style, 'height', '40px')
+						A2(elm$html$Html$Attributes$style, 'height', '40px'),
+						A2(elm$html$Html$Attributes$style, 'margin-bottom', '13px')
 					]),
 				_List_fromArray(
 					[
@@ -6731,6 +6759,7 @@ var author$project$Main$view = function (model) {
 							[
 								elm$html$Html$Attributes$placeholder('category'),
 								elm$html$Html$Events$onInput(author$project$Main$UpdateCategory),
+								elm_community$html_extra$Html$Events$Extra$onEnter(author$project$Main$Search),
 								A2(elm$html$Html$Attributes$style, 'flex-grow', '3'),
 								A2(elm$html$Html$Attributes$style, 'font-size', '16px'),
 								A2(elm$html$Html$Attributes$style, 'padding', '5px'),
@@ -6784,7 +6813,10 @@ var author$project$Main$view = function (model) {
 						_List_Nil),
 						A2(
 						elm$html$Html$label,
-						_List_Nil,
+						_List_fromArray(
+							[
+								A2(elm$html$Html$Attributes$style, 'padding-left', '10px')
+							]),
 						_List_fromArray(
 							[
 								A2(
