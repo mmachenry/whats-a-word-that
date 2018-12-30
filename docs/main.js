@@ -6757,7 +6757,7 @@ var author$project$Main$view = function (model) {
 						elm$html$Html$input,
 						_List_fromArray(
 							[
-								elm$html$Html$Attributes$placeholder('category'),
+								elm$html$Html$Attributes$placeholder('wiki category (e.g. National_Hockey_League_All-Stars)'),
 								elm$html$Html$Events$onInput(author$project$Main$UpdateCategory),
 								elm_community$html_extra$Html$Events$Extra$onEnter(author$project$Main$Search),
 								A2(elm$html$Html$Attributes$style, 'flex-grow', '3'),

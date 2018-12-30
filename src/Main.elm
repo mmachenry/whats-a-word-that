@@ -111,7 +111,7 @@ view model =
               style "align-items" "stretch",
               style "height" "40px",
               style "margin-bottom" "13px"] [
-            input [ placeholder "category",
+            input [ placeholder "wiki category (e.g. National_Hockey_League_All-Stars)",
                     onInput UpdateCategory,
                     onEnter Search,
                     style "flex-grow" "3",
