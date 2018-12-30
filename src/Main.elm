@@ -26,6 +26,7 @@ type alias Model = {
     categoryInput : String,
     category : String,
     regex : String,
+    caseSensitive: Bool,
     error : Maybe Http.Error,
     visible : Bool,
     continue : Maybe String,
@@ -50,6 +51,7 @@ initModel = {
     categoryInput = "",
     category = "",
     regex = "",
+    caseSensitive = False,
     error = Nothing,
     visible = False,
     continue = Nothing,
@@ -63,6 +65,7 @@ init _ = (initModel, observe "#loadBtn")
 type Msg =
       UpdateCategory String
     | UpdateRegex String
+    | UpdateCaseSensitive
     | Search
     | LoadMore
     | UpdateVisibility (String, Bool)
@@ -72,6 +75,7 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = case msg of
     UpdateCategory str -> ({ model | categoryInput = str }, Cmd.none)
     UpdateRegex str -> ({ model | regex = str }, Cmd.none)
+    UpdateCaseSensitive -> ({ model | caseSensitive = not model.caseSensitive}, Cmd.none)
     Search ->
         let newCategory = "Category:" ++ model.categoryInput
         in ({model |
@@ -126,13 +130,34 @@ view model =
                 style "width" "100%",
                 style "font-size" "16px",
                 onInput UpdateRegex
-                ] []],
+                ] [],
+            label [] [
+                input [
+                  type_ "checkbox",
+                  checked model.caseSensitive,
+                  onClick UpdateCaseSensitive
+                  ] [],
+                text "case sensitive?"
+              ]
+            ],
         viewResults model
     ]
 
+fromString : String -> Bool -> Maybe Regex.Regex
+fromString string caseInsensitive = fromStringWith { caseInsensitive = caseInsensitive, multiline = False } string
+
+fromStringWith : Options -> String -> Maybe Regex.Regex
+fromStringWith =
+  Elm.Kernel.Regex.fromStringWith
+
+type alias Options =
+  { caseInsensitive : Bool
+  , multiline : Bool }
+
+
 viewResults : Model -> Html Msg
 viewResults model =
-    let matches = case Regex.fromString model.regex of
+    let matches = case fromString model.regex (not model.caseSensitive) of
             Nothing -> model.pages
             Just regex -> Array.filter (\p->Regex.contains regex p.title)
                                        model.pages
