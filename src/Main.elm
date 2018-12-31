@@ -76,7 +76,8 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = case msg of
     UpdateCategory str -> ({ model | categoryInput = str }, Cmd.none)
     UpdateRegex str -> ({ model | regex = str }, Cmd.none)
-    UpdateCaseSensitive -> ({ model | caseSensitive = not model.caseSensitive}, Cmd.none)
+    UpdateCaseSensitive ->
+        ({ model | caseSensitive = not model.caseSensitive}, Cmd.none)
     Search ->
         let newCategory = "Category:" ++ model.categoryInput
         in ({model |
@@ -85,7 +86,7 @@ update msg model = case msg of
                 pages = Array.empty,
                 subCategories = []},
             getCategoryMembers newCategory Nothing)
-    LoadMore -> loadMore model
+    LoadMore -> loadMore { model | visible = True }
     UpdateVisibility (elementId, shown) -> loadMore { model | visible = shown }
     UpdateResults (Err err) -> ({ model | error = Just err }, Cmd.none)
     UpdateResults (Ok result) ->
@@ -146,21 +147,12 @@ view model =
         viewResults model
     ]
 
-fromString : String -> Bool -> Maybe Regex.Regex
-fromString string caseInsensitive = fromStringWith { caseInsensitive = caseInsensitive, multiline = False } string
-
-fromStringWith : Options -> String -> Maybe Regex.Regex
-fromStringWith =
-  Elm.Kernel.Regex.fromStringWith
-
-type alias Options =
-  { caseInsensitive : Bool
-  , multiline : Bool }
-
-
 viewResults : Model -> Html Msg
 viewResults model =
-    let matches = case fromString model.regex (not model.caseSensitive) of
+    let matches = case Regex.fromStringWith {
+                           caseInsensitive = (not model.caseSensitive),
+                           multiline = False
+                           } model.regex of
             Nothing -> model.pages
             Just regex -> Array.filter (\p->Regex.contains regex p.title)
                                        model.pages

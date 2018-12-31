@@ -2525,107 +2525,6 @@ var _Bitwise_shiftRightZfBy = F2(function(offset, a)
 });
 
 
-// CREATE
-
-var _Regex_never = /.^/;
-
-var _Regex_fromStringWith = F2(function(options, string)
-{
-	var flags = 'g';
-	if (options.multiline) { flags += 'm'; }
-	if (options.caseInsensitive) { flags += 'i'; }
-
-	try
-	{
-		return elm$core$Maybe$Just(new RegExp(string, flags));
-	}
-	catch(error)
-	{
-		return elm$core$Maybe$Nothing;
-	}
-});
-
-
-// USE
-
-var _Regex_contains = F2(function(re, string)
-{
-	return string.match(re) !== null;
-});
-
-
-var _Regex_findAtMost = F3(function(n, re, str)
-{
-	var out = [];
-	var number = 0;
-	var string = str;
-	var lastIndex = re.lastIndex;
-	var prevLastIndex = -1;
-	var result;
-	while (number++ < n && (result = re.exec(string)))
-	{
-		if (prevLastIndex == re.lastIndex) break;
-		var i = result.length - 1;
-		var subs = new Array(i);
-		while (i > 0)
-		{
-			var submatch = result[i];
-			subs[--i] = submatch
-				? elm$core$Maybe$Just(submatch)
-				: elm$core$Maybe$Nothing;
-		}
-		out.push(A4(elm$regex$Regex$Match, result[0], result.index, number, _List_fromArray(subs)));
-		prevLastIndex = re.lastIndex;
-	}
-	re.lastIndex = lastIndex;
-	return _List_fromArray(out);
-});
-
-
-var _Regex_replaceAtMost = F4(function(n, re, replacer, string)
-{
-	var count = 0;
-	function jsReplacer(match)
-	{
-		if (count++ >= n)
-		{
-			return match;
-		}
-		var i = arguments.length - 3;
-		var submatches = new Array(i);
-		while (i > 0)
-		{
-			var submatch = arguments[i];
-			submatches[--i] = submatch
-				? elm$core$Maybe$Just(submatch)
-				: elm$core$Maybe$Nothing;
-		}
-		return replacer(A4(elm$regex$Regex$Match, match, arguments[arguments.length - 2], count, _List_fromArray(submatches)));
-	}
-	return string.replace(re, jsReplacer);
-});
-
-var _Regex_splitAtMost = F3(function(n, re, str)
-{
-	var string = str;
-	var out = [];
-	var start = re.lastIndex;
-	var restoreLastIndex = re.lastIndex;
-	while (n--)
-	{
-		var result = re.exec(string);
-		if (!result) break;
-		out.push(string.slice(start, result.index));
-		start = re.lastIndex;
-	}
-	out.push(string.slice(start));
-	re.lastIndex = restoreLastIndex;
-	return _List_fromArray(out);
-});
-
-var _Regex_infinity = Infinity;
-
-
 
 
 // HELPERS
@@ -4182,6 +4081,107 @@ function _VirtualDom_dekey(keyedNode)
 		b: keyedNode.b
 	};
 }
+
+
+// CREATE
+
+var _Regex_never = /.^/;
+
+var _Regex_fromStringWith = F2(function(options, string)
+{
+	var flags = 'g';
+	if (options.multiline) { flags += 'm'; }
+	if (options.caseInsensitive) { flags += 'i'; }
+
+	try
+	{
+		return elm$core$Maybe$Just(new RegExp(string, flags));
+	}
+	catch(error)
+	{
+		return elm$core$Maybe$Nothing;
+	}
+});
+
+
+// USE
+
+var _Regex_contains = F2(function(re, string)
+{
+	return string.match(re) !== null;
+});
+
+
+var _Regex_findAtMost = F3(function(n, re, str)
+{
+	var out = [];
+	var number = 0;
+	var string = str;
+	var lastIndex = re.lastIndex;
+	var prevLastIndex = -1;
+	var result;
+	while (number++ < n && (result = re.exec(string)))
+	{
+		if (prevLastIndex == re.lastIndex) break;
+		var i = result.length - 1;
+		var subs = new Array(i);
+		while (i > 0)
+		{
+			var submatch = result[i];
+			subs[--i] = submatch
+				? elm$core$Maybe$Just(submatch)
+				: elm$core$Maybe$Nothing;
+		}
+		out.push(A4(elm$regex$Regex$Match, result[0], result.index, number, _List_fromArray(subs)));
+		prevLastIndex = re.lastIndex;
+	}
+	re.lastIndex = lastIndex;
+	return _List_fromArray(out);
+});
+
+
+var _Regex_replaceAtMost = F4(function(n, re, replacer, string)
+{
+	var count = 0;
+	function jsReplacer(match)
+	{
+		if (count++ >= n)
+		{
+			return match;
+		}
+		var i = arguments.length - 3;
+		var submatches = new Array(i);
+		while (i > 0)
+		{
+			var submatch = arguments[i];
+			submatches[--i] = submatch
+				? elm$core$Maybe$Just(submatch)
+				: elm$core$Maybe$Nothing;
+		}
+		return replacer(A4(elm$regex$Regex$Match, match, arguments[arguments.length - 2], count, _List_fromArray(submatches)));
+	}
+	return string.replace(re, jsReplacer);
+});
+
+var _Regex_splitAtMost = F3(function(n, re, str)
+{
+	var string = str;
+	var out = [];
+	var start = re.lastIndex;
+	var restoreLastIndex = re.lastIndex;
+	while (n--)
+	{
+		var result = re.exec(string);
+		if (!result) break;
+		out.push(string.slice(start, result.index));
+		start = re.lastIndex;
+	}
+	out.push(string.slice(start));
+	re.lastIndex = restoreLastIndex;
+	return _List_fromArray(out);
+});
+
+var _Regex_infinity = Infinity;
 
 
 
@@ -6423,7 +6423,10 @@ var author$project$Main$update = F2(
 						{category: newCategory, _continue: elm$core$Maybe$Nothing, pages: elm$core$Array$empty, subCategories: _List_Nil}),
 					A2(author$project$Main$getCategoryMembers, newCategory, elm$core$Maybe$Nothing));
 			case 'LoadMore':
-				return author$project$Main$loadMore(model);
+				return author$project$Main$loadMore(
+					_Utils_update(
+						model,
+						{visible: true}));
 			case 'UpdateVisibility':
 				var _n1 = msg.a;
 				var elementId = _n1.a;
@@ -6485,18 +6488,6 @@ var author$project$Main$UpdateRegex = function (a) {
 	return {$: 'UpdateRegex', a: a};
 };
 var author$project$Main$LoadMore = {$: 'LoadMore'};
-var elm$regex$Regex$Match = F4(
-	function (match, index, number, submatches) {
-		return {index: index, match: match, number: number, submatches: submatches};
-	});
-var author$project$Main$fromStringWith = _Regex_fromStringWith;
-var author$project$Main$fromString = F2(
-	function (string, caseInsensitive) {
-		return A2(
-			author$project$Main$fromStringWith,
-			{caseInsensitive: caseInsensitive, multiline: false},
-			string);
-	});
 var elm$core$Array$filter = F2(
 	function (isGood, array) {
 		return elm$core$Array$fromList(
@@ -6576,7 +6567,12 @@ var elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		elm$json$Json$Decode$succeed(msg));
 };
+var elm$regex$Regex$Match = F4(
+	function (match, index, number, submatches) {
+		return {index: index, match: match, number: number, submatches: submatches};
+	});
 var elm$regex$Regex$contains = _Regex_contains;
+var elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
 var author$project$Main$viewResults = function (model) {
 	var mkListItem = function (page) {
 		return A2(
@@ -6600,7 +6596,10 @@ var author$project$Main$viewResults = function (model) {
 				]));
 	};
 	var matches = function () {
-		var _n0 = A2(author$project$Main$fromString, model.regex, !model.caseSensitive);
+		var _n0 = A2(
+			elm$regex$Regex$fromStringWith,
+			{caseInsensitive: !model.caseSensitive, multiline: false},
+			model.regex);
 		if (_n0.$ === 'Nothing') {
 			return model.pages;
 		} else {
