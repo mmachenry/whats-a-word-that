@@ -3,6 +3,7 @@ port module Main exposing (main)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
+import Html.Events.Extra exposing (onEnter)
 import Browser
 import Http
 import Json.Decode as Json
@@ -26,6 +27,7 @@ type alias Model = {
     categoryInput : String,
     category : String,
     regex : String,
+    caseSensitive: Bool,
     error : Maybe Http.Error,
     visible : Bool,
     continue : Maybe String,
@@ -50,6 +52,7 @@ initModel = {
     categoryInput = "",
     category = "",
     regex = "",
+    caseSensitive = False,
     error = Nothing,
     visible = False,
     continue = Nothing,
@@ -63,6 +66,7 @@ init _ = (initModel, observe "#loadBtn")
 type Msg =
       UpdateCategory String
     | UpdateRegex String
+    | UpdateCaseSensitive
     | Search
     | LoadMore
     | UpdateVisibility (String, Bool)
@@ -72,6 +76,7 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = case msg of
     UpdateCategory str -> ({ model | categoryInput = str }, Cmd.none)
     UpdateRegex str -> ({ model | regex = str }, Cmd.none)
+    UpdateCaseSensitive -> ({ model | caseSensitive = not model.caseSensitive}, Cmd.none)
     Search ->
         let newCategory = "Category:" ++ model.categoryInput
         in ({model |
@@ -104,9 +109,11 @@ view model =
         div [ style "display" "flex",
               style "justify-content" "space-between",
               style "align-items" "stretch",
-              style "height" "40px" ] [
-            input [ placeholder "category",
+              style "height" "40px",
+              style "margin-bottom" "13px"] [
+            input [ placeholder "wiki category (e.g. National_Hockey_League_All-Stars)",
                     onInput UpdateCategory,
+                    onEnter Search,
                     style "flex-grow" "3",
                     style "font-size" "16px",
                     style "padding" "5px",
@@ -126,25 +133,56 @@ view model =
                 style "width" "100%",
                 style "font-size" "16px",
                 onInput UpdateRegex
-                ] []],
+                ] [],
+            label [ style "padding-left" "10px"] [
+                input [
+                  type_ "checkbox",
+                  checked model.caseSensitive,
+                  onClick UpdateCaseSensitive
+                  ] [],
+                text "case sensitive?"
+              ]
+            ],
         viewResults model
     ]
 
+fromString : String -> Bool -> Maybe Regex.Regex
+fromString string caseInsensitive = fromStringWith { caseInsensitive = caseInsensitive, multiline = False } string
+
+fromStringWith : Options -> String -> Maybe Regex.Regex
+fromStringWith =
+  Elm.Kernel.Regex.fromStringWith
+
+type alias Options =
+  { caseInsensitive : Bool
+  , multiline : Bool }
+
+
 viewResults : Model -> Html Msg
 viewResults model =
-    let matches = case Regex.fromString model.regex of
+    let matches = case fromString model.regex (not model.caseSensitive) of
             Nothing -> model.pages
             Just regex -> Array.filter (\p->Regex.contains regex p.title)
                                        model.pages
         mkListItem page =
             li [] [a [href (mkUrl wikiHost ("/wiki/" ++ page.title) []),
-                      target "_blank"]
+                      target "_blank",
+                      style "color" "black"]
                      [text page.title]]
     in div [] [
-        div [] [ text <| (toString (Array.length model.pages)) ++
-                         " loaded / " ++
-                         (toString (Array.length matches)) ++ " matches" ],
-        ol [] (List.map mkListItem (Array.toList matches)),
+        div [ style "margin-top" "4px",
+              style "font-size" "13px",
+              style "font-family" "Helvetica, Arial, sans-serif",
+              style "color" "#999"
+            ] [ text <|
+                         (toString (Array.length matches)) ++ " matches / " ++
+                         (toString (Array.length model.pages)) ++
+                         " loaded" ],
+        ol [ style "color" "#999",
+             style "font-family" "'PT Mono', monospace",
+             style "line-height" "1.6",
+             style "font-size" "13px"
+        ] (List.map mkListItem (Array.toList matches)),
         div [id "loadBtn",
              hidden (model.continue == Nothing &&
                      List.length model.subCategories == 0)]

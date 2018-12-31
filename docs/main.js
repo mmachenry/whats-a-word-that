@@ -2525,6 +2525,107 @@ var _Bitwise_shiftRightZfBy = F2(function(offset, a)
 });
 
 
+// CREATE
+
+var _Regex_never = /.^/;
+
+var _Regex_fromStringWith = F2(function(options, string)
+{
+	var flags = 'g';
+	if (options.multiline) { flags += 'm'; }
+	if (options.caseInsensitive) { flags += 'i'; }
+
+	try
+	{
+		return elm$core$Maybe$Just(new RegExp(string, flags));
+	}
+	catch(error)
+	{
+		return elm$core$Maybe$Nothing;
+	}
+});
+
+
+// USE
+
+var _Regex_contains = F2(function(re, string)
+{
+	return string.match(re) !== null;
+});
+
+
+var _Regex_findAtMost = F3(function(n, re, str)
+{
+	var out = [];
+	var number = 0;
+	var string = str;
+	var lastIndex = re.lastIndex;
+	var prevLastIndex = -1;
+	var result;
+	while (number++ < n && (result = re.exec(string)))
+	{
+		if (prevLastIndex == re.lastIndex) break;
+		var i = result.length - 1;
+		var subs = new Array(i);
+		while (i > 0)
+		{
+			var submatch = result[i];
+			subs[--i] = submatch
+				? elm$core$Maybe$Just(submatch)
+				: elm$core$Maybe$Nothing;
+		}
+		out.push(A4(elm$regex$Regex$Match, result[0], result.index, number, _List_fromArray(subs)));
+		prevLastIndex = re.lastIndex;
+	}
+	re.lastIndex = lastIndex;
+	return _List_fromArray(out);
+});
+
+
+var _Regex_replaceAtMost = F4(function(n, re, replacer, string)
+{
+	var count = 0;
+	function jsReplacer(match)
+	{
+		if (count++ >= n)
+		{
+			return match;
+		}
+		var i = arguments.length - 3;
+		var submatches = new Array(i);
+		while (i > 0)
+		{
+			var submatch = arguments[i];
+			submatches[--i] = submatch
+				? elm$core$Maybe$Just(submatch)
+				: elm$core$Maybe$Nothing;
+		}
+		return replacer(A4(elm$regex$Regex$Match, match, arguments[arguments.length - 2], count, _List_fromArray(submatches)));
+	}
+	return string.replace(re, jsReplacer);
+});
+
+var _Regex_splitAtMost = F3(function(n, re, str)
+{
+	var string = str;
+	var out = [];
+	var start = re.lastIndex;
+	var restoreLastIndex = re.lastIndex;
+	while (n--)
+	{
+		var result = re.exec(string);
+		if (!result) break;
+		out.push(string.slice(start, result.index));
+		start = re.lastIndex;
+	}
+	out.push(string.slice(start));
+	re.lastIndex = restoreLastIndex;
+	return _List_fromArray(out);
+});
+
+var _Regex_infinity = Infinity;
+
+
 
 
 // HELPERS
@@ -4083,107 +4184,6 @@ function _VirtualDom_dekey(keyedNode)
 }
 
 
-// CREATE
-
-var _Regex_never = /.^/;
-
-var _Regex_fromStringWith = F2(function(options, string)
-{
-	var flags = 'g';
-	if (options.multiline) { flags += 'm'; }
-	if (options.caseInsensitive) { flags += 'i'; }
-
-	try
-	{
-		return elm$core$Maybe$Just(new RegExp(string, flags));
-	}
-	catch(error)
-	{
-		return elm$core$Maybe$Nothing;
-	}
-});
-
-
-// USE
-
-var _Regex_contains = F2(function(re, string)
-{
-	return string.match(re) !== null;
-});
-
-
-var _Regex_findAtMost = F3(function(n, re, str)
-{
-	var out = [];
-	var number = 0;
-	var string = str;
-	var lastIndex = re.lastIndex;
-	var prevLastIndex = -1;
-	var result;
-	while (number++ < n && (result = re.exec(string)))
-	{
-		if (prevLastIndex == re.lastIndex) break;
-		var i = result.length - 1;
-		var subs = new Array(i);
-		while (i > 0)
-		{
-			var submatch = result[i];
-			subs[--i] = submatch
-				? elm$core$Maybe$Just(submatch)
-				: elm$core$Maybe$Nothing;
-		}
-		out.push(A4(elm$regex$Regex$Match, result[0], result.index, number, _List_fromArray(subs)));
-		prevLastIndex = re.lastIndex;
-	}
-	re.lastIndex = lastIndex;
-	return _List_fromArray(out);
-});
-
-
-var _Regex_replaceAtMost = F4(function(n, re, replacer, string)
-{
-	var count = 0;
-	function jsReplacer(match)
-	{
-		if (count++ >= n)
-		{
-			return match;
-		}
-		var i = arguments.length - 3;
-		var submatches = new Array(i);
-		while (i > 0)
-		{
-			var submatch = arguments[i];
-			submatches[--i] = submatch
-				? elm$core$Maybe$Just(submatch)
-				: elm$core$Maybe$Nothing;
-		}
-		return replacer(A4(elm$regex$Regex$Match, match, arguments[arguments.length - 2], count, _List_fromArray(submatches)));
-	}
-	return string.replace(re, jsReplacer);
-});
-
-var _Regex_splitAtMost = F3(function(n, re, str)
-{
-	var string = str;
-	var out = [];
-	var start = re.lastIndex;
-	var restoreLastIndex = re.lastIndex;
-	while (n--)
-	{
-		var result = re.exec(string);
-		if (!result) break;
-		out.push(string.slice(start, result.index));
-		start = re.lastIndex;
-	}
-	out.push(string.slice(start));
-	re.lastIndex = restoreLastIndex;
-	return _List_fromArray(out);
-});
-
-var _Regex_infinity = Infinity;
-
-
 
 
 // ELEMENT
@@ -4721,7 +4721,7 @@ var elm$core$Elm$JsArray$empty = _JsArray_empty;
 var elm$core$Array$empty = A4(elm$core$Array$Array_elm_builtin, 0, elm$core$Array$shiftStep, elm$core$Elm$JsArray$empty, elm$core$Elm$JsArray$empty);
 var elm$core$Basics$False = {$: 'False'};
 var elm$core$Maybe$Nothing = {$: 'Nothing'};
-var author$project$Main$initModel = {category: '', categoryInput: '', _continue: elm$core$Maybe$Nothing, error: elm$core$Maybe$Nothing, pages: elm$core$Array$empty, regex: '', subCategories: _List_Nil, visible: false};
+var author$project$Main$initModel = {caseSensitive: false, category: '', categoryInput: '', _continue: elm$core$Maybe$Nothing, error: elm$core$Maybe$Nothing, pages: elm$core$Array$empty, regex: '', subCategories: _List_Nil, visible: false};
 var elm$core$Array$Leaf = function (a) {
 	return {$: 'Leaf', a: a};
 };
@@ -6409,6 +6409,12 @@ var author$project$Main$update = F2(
 						model,
 						{regex: str}),
 					elm$core$Platform$Cmd$none);
+			case 'UpdateCaseSensitive':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{caseSensitive: !model.caseSensitive}),
+					elm$core$Platform$Cmd$none);
 			case 'Search':
 				var newCategory = 'Category:' + model.categoryInput;
 				return _Utils_Tuple2(
@@ -6471,6 +6477,7 @@ var author$project$Main$update = F2(
 		}
 	});
 var author$project$Main$Search = {$: 'Search'};
+var author$project$Main$UpdateCaseSensitive = {$: 'UpdateCaseSensitive'};
 var author$project$Main$UpdateCategory = function (a) {
 	return {$: 'UpdateCategory', a: a};
 };
@@ -6478,6 +6485,18 @@ var author$project$Main$UpdateRegex = function (a) {
 	return {$: 'UpdateRegex', a: a};
 };
 var author$project$Main$LoadMore = {$: 'LoadMore'};
+var elm$regex$Regex$Match = F4(
+	function (match, index, number, submatches) {
+		return {index: index, match: match, number: number, submatches: submatches};
+	});
+var author$project$Main$fromStringWith = _Regex_fromStringWith;
+var author$project$Main$fromString = F2(
+	function (string, caseInsensitive) {
+		return A2(
+			author$project$Main$fromStringWith,
+			{caseInsensitive: caseInsensitive, multiline: false},
+			string);
+	});
 var elm$core$Array$filter = F2(
 	function (isGood, array) {
 		return elm$core$Array$fromList(
@@ -6537,6 +6556,8 @@ var elm$html$Html$Attributes$href = function (url) {
 		_VirtualDom_noJavaScriptUri(url));
 };
 var elm$html$Html$Attributes$id = elm$html$Html$Attributes$stringProperty('id');
+var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
 var elm$html$Html$Attributes$target = elm$html$Html$Attributes$stringProperty('target');
 var elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
@@ -6555,18 +6576,7 @@ var elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		elm$json$Json$Decode$succeed(msg));
 };
-var elm$regex$Regex$Match = F4(
-	function (match, index, number, submatches) {
-		return {index: index, match: match, number: number, submatches: submatches};
-	});
 var elm$regex$Regex$contains = _Regex_contains;
-var elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
-var elm$regex$Regex$fromString = function (string) {
-	return A2(
-		elm$regex$Regex$fromStringWith,
-		{caseInsensitive: false, multiline: false},
-		string);
-};
 var author$project$Main$viewResults = function (model) {
 	var mkListItem = function (page) {
 		return A2(
@@ -6580,7 +6590,8 @@ var author$project$Main$viewResults = function (model) {
 						[
 							elm$html$Html$Attributes$href(
 							A3(author$project$Main$mkUrl, author$project$Main$wikiHost, '/wiki/' + page.title, _List_Nil)),
-							elm$html$Html$Attributes$target('_blank')
+							elm$html$Html$Attributes$target('_blank'),
+							A2(elm$html$Html$Attributes$style, 'color', 'black')
 						]),
 					_List_fromArray(
 						[
@@ -6589,7 +6600,7 @@ var author$project$Main$viewResults = function (model) {
 				]));
 	};
 	var matches = function () {
-		var _n0 = elm$regex$Regex$fromString(model.regex);
+		var _n0 = A2(author$project$Main$fromString, model.regex, !model.caseSensitive);
 		if (_n0.$ === 'Nothing') {
 			return model.pages;
 		} else {
@@ -6609,17 +6620,29 @@ var author$project$Main$viewResults = function (model) {
 			[
 				A2(
 				elm$html$Html$div,
-				_List_Nil,
+				_List_fromArray(
+					[
+						A2(elm$html$Html$Attributes$style, 'margin-top', '4px'),
+						A2(elm$html$Html$Attributes$style, 'font-size', '13px'),
+						A2(elm$html$Html$Attributes$style, 'font-family', 'Helvetica, Arial, sans-serif'),
+						A2(elm$html$Html$Attributes$style, 'color', '#999')
+					]),
 				_List_fromArray(
 					[
 						elm$html$Html$text(
 						elm$core$Debug$toString(
-							elm$core$Array$length(model.pages)) + (' loaded / ' + (elm$core$Debug$toString(
-							elm$core$Array$length(matches)) + ' matches')))
+							elm$core$Array$length(matches)) + (' matches / ' + (elm$core$Debug$toString(
+							elm$core$Array$length(model.pages)) + ' loaded')))
 					])),
 				A2(
 				elm$html$Html$ol,
-				_List_Nil,
+				_List_fromArray(
+					[
+						A2(elm$html$Html$Attributes$style, 'color', '#999'),
+						A2(elm$html$Html$Attributes$style, 'font-family', '\'PT Mono\', monospace'),
+						A2(elm$html$Html$Attributes$style, 'line-height', '1.6'),
+						A2(elm$html$Html$Attributes$style, 'font-size', '13px')
+					]),
 				A2(
 					elm$core$List$map,
 					mkListItem,
@@ -6649,10 +6672,11 @@ var author$project$Main$viewResults = function (model) {
 };
 var elm$html$Html$h1 = _VirtualDom_node('h1');
 var elm$html$Html$input = _VirtualDom_node('input');
+var elm$html$Html$label = _VirtualDom_node('label');
+var elm$html$Html$Attributes$checked = elm$html$Html$Attributes$boolProperty('checked');
 var elm$html$Html$Attributes$disabled = elm$html$Html$Attributes$boolProperty('disabled');
 var elm$html$Html$Attributes$placeholder = elm$html$Html$Attributes$stringProperty('placeholder');
-var elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var elm$html$Html$Attributes$style = elm$virtual_dom$VirtualDom$style;
+var elm$html$Html$Attributes$type_ = elm$html$Html$Attributes$stringProperty('type');
 var elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
 };
@@ -6684,6 +6708,20 @@ var elm$html$Html$Events$onInput = function (tagger) {
 			elm$html$Html$Events$alwaysStop,
 			A2(elm$json$Json$Decode$map, tagger, elm$html$Html$Events$targetValue)));
 };
+var elm$html$Html$Events$keyCode = A2(elm$json$Json$Decode$field, 'keyCode', elm$json$Json$Decode$int);
+var elm$json$Json$Decode$fail = _Json_fail;
+var elm_community$html_extra$Html$Events$Extra$onEnter = function (onEnterAction) {
+	return A2(
+		elm$html$Html$Events$on,
+		'keyup',
+		A2(
+			elm$json$Json$Decode$andThen,
+			function (keyCode) {
+				return (keyCode === 13) ? elm$json$Json$Decode$succeed(onEnterAction) : elm$json$Json$Decode$fail(
+					elm$core$String$fromInt(keyCode));
+			},
+			elm$html$Html$Events$keyCode));
+};
 var author$project$Main$view = function (model) {
 	return A2(
 		elm$html$Html$div,
@@ -6710,7 +6748,8 @@ var author$project$Main$view = function (model) {
 						A2(elm$html$Html$Attributes$style, 'display', 'flex'),
 						A2(elm$html$Html$Attributes$style, 'justify-content', 'space-between'),
 						A2(elm$html$Html$Attributes$style, 'align-items', 'stretch'),
-						A2(elm$html$Html$Attributes$style, 'height', '40px')
+						A2(elm$html$Html$Attributes$style, 'height', '40px'),
+						A2(elm$html$Html$Attributes$style, 'margin-bottom', '13px')
 					]),
 				_List_fromArray(
 					[
@@ -6718,8 +6757,9 @@ var author$project$Main$view = function (model) {
 						elm$html$Html$input,
 						_List_fromArray(
 							[
-								elm$html$Html$Attributes$placeholder('category'),
+								elm$html$Html$Attributes$placeholder('wiki category (e.g. National_Hockey_League_All-Stars)'),
 								elm$html$Html$Events$onInput(author$project$Main$UpdateCategory),
+								elm_community$html_extra$Html$Events$Extra$onEnter(author$project$Main$Search),
 								A2(elm$html$Html$Attributes$style, 'flex-grow', '3'),
 								A2(elm$html$Html$Attributes$style, 'font-size', '16px'),
 								A2(elm$html$Html$Attributes$style, 'padding', '5px'),
@@ -6770,7 +6810,26 @@ var author$project$Main$view = function (model) {
 								A2(elm$html$Html$Attributes$style, 'font-size', '16px'),
 								elm$html$Html$Events$onInput(author$project$Main$UpdateRegex)
 							]),
-						_List_Nil)
+						_List_Nil),
+						A2(
+						elm$html$Html$label,
+						_List_fromArray(
+							[
+								A2(elm$html$Html$Attributes$style, 'padding-left', '10px')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								elm$html$Html$input,
+								_List_fromArray(
+									[
+										elm$html$Html$Attributes$type_('checkbox'),
+										elm$html$Html$Attributes$checked(model.caseSensitive),
+										elm$html$Html$Events$onClick(author$project$Main$UpdateCaseSensitive)
+									]),
+								_List_Nil),
+								elm$html$Html$text('case sensitive?')
+							]))
 					])),
 				author$project$Main$viewResults(model)
 			]));
