@@ -86,8 +86,9 @@ update msg model = case msg of
                 pages = Array.empty,
                 subCategories = []},
             getCategoryMembers newCategory Nothing)
-    LoadMore -> loadMore { model | visible = True }
-    UpdateVisibility (elementId, shown) -> loadMore { model | visible = shown }
+    LoadMore -> loadMore model
+    UpdateVisibility (elementId, shown) ->
+        loadMoreIfVisible { model | visible = shown }
     UpdateResults (Err err) -> ({ model | error = Just err }, Cmd.none)
     UpdateResults (Ok result) ->
         let namespace i page = page.ns == i
@@ -96,7 +97,7 @@ update msg model = case msg of
                                       || String.startsWith "List of " p.title))
                     (List.filter (namespace 0) result.pages)
             newSubCats = List.filter (namespace 14) result.pages
-        in loadMore { model |
+        in loadMoreIfVisible { model |
                error = Nothing,
                continue = result.cmcontinue,
                pages = Array.append model.pages (Array.fromList newPages),
@@ -208,17 +209,21 @@ mkUrl host page args =
     let argStr = String.join "&" (List.map (\(n,v)-> n ++ "=" ++ v) args)
     in "https://" ++ host ++ page ++ argStr
 
+loadMoreIfVisible : Model -> (Model, Cmd Msg)
+loadMoreIfVisible model =
+    if model.visible
+    then loadMore model
+    else (model, Cmd.none)
+
 loadMore : Model -> (Model, Cmd Msg)
 loadMore model =
-    if model.visible
-    then case model.subCategories of
-             (sc::scs) -> ({ model | subCategories = scs},
-                           getCategoryMembers sc.title Nothing)
-             [] -> case model.continue of
-                       Just str ->
-                           (model, getCategoryMembers model.category (Just str))
-                       Nothing -> (model, Cmd.none)
-    else (model, Cmd.none)
+    case model.subCategories of
+        (sc::scs) -> ({ model | subCategories = scs},
+                      getCategoryMembers sc.title Nothing)
+        [] -> case model.continue of
+                  Just str ->
+                      (model, getCategoryMembers model.category (Just str))
+                  Nothing -> (model, Cmd.none)
 
 categoryList : Json.Decoder CategoryList
 categoryList =
