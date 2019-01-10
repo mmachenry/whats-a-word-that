@@ -13,6 +13,7 @@
             "elm/json": "1.1.2",
             "elm/regex": "1.0.0",
             "elm-community/html-extra": "3.0.0",
+            "elm-community/list-extra": "8.1.0",
             "mdgriffith/elm-ui": "1.1.0"
         },
         "indirect": {
