@@ -1,5 +1,3 @@
--- TODO display errors
-
 port module Main exposing (main)
 
 import Html exposing (..)
@@ -21,9 +19,6 @@ import Element.Font as Font
 import Element.Input as Input
 import Element.Background as Background
 
-wikiHost = "en.wikipedia.org"
--- wikiHost = "transformersprime.wikia.com"
-
 port observe : String -> Cmd msg
 port onVisible : ((String, Bool) -> msg) -> Sub msg
 
@@ -34,6 +29,7 @@ main = Browser.element {
     subscriptions = subscriptions }
 
 type alias Model = {
+    wikiHost : String,
     category : String,
     regex : String,
     caseSensitive: Bool,
@@ -45,7 +41,8 @@ type alias Model = {
     autoState : Autocomplete.State
     }
 
-type alias Flags = {}
+type alias Flags = {
+    }
 
 type alias CategoryList = {
     cmcontinue : Maybe String,
@@ -58,7 +55,9 @@ type alias WikiPage = {
     title : String
     }
 
-initModel = {
+initModel : Flags -> Model
+initModel flags = {
+    wikiHost = "en.wikipedia.org",
     category = "",
     regex = "",
     caseSensitive = False,
@@ -71,7 +70,7 @@ initModel = {
     }
 
 init : Flags -> (Model, Cmd Msg)
-init _ = (initModel, observe "#loadBtn")
+init flags = (initModel flags, observe "#loadBtn")
 
 type Msg =
       UpdateRegex String
@@ -93,7 +92,7 @@ update msg model = case msg of
                 continue = Nothing,
                 pages = Array.empty,
                 subCategories = []},
-            getCategoryMembers newCategory Nothing)
+            getCategoryMembers model.wikiHost newCategory Nothing)
     LoadMore -> loadMore model
     UpdateVisibility (elementId, shown) ->
         loadMoreIfVisible { model | visible = shown }
@@ -190,7 +189,7 @@ viewResults model =
             Just regex -> Array.filter (\p->Regex.contains regex p.title)
                                        model.pages
         mkListItem page =
-            li [] [a [href (mkUrl wikiHost ("/wiki/" ++ page.title) []),
+            li [] [a [href (mkUrl model.wikiHost ("/wiki/" ++ page.title) []),
                       target "_blank",
                       style "color" "black"]
                      [text page.title]]
@@ -220,8 +219,8 @@ subscriptions model =
         Autocomplete.subscriptions autoConfig model.autoState
         ]
 
-getCategoryMembers : String -> Maybe String -> Cmd Msg
-getCategoryMembers category continue =
+getCategoryMembers : String -> String -> Maybe String -> Cmd Msg
+getCategoryMembers host category continue =
     let args = [
           ("action","query"),
           ("list","categorymembers"),
@@ -229,7 +228,7 @@ getCategoryMembers category continue =
           ("origin","*"),
           ("format","json"),
           ("cmtitle",category)]
-        url = mkUrl wikiHost "/w/api.php?" (case continue of
+        url = mkUrl host "/w/api.php?" (case continue of
                 Just str -> ("cmcontinue",str) :: args
                 Nothing -> args)
     in Http.get {
@@ -252,10 +251,13 @@ loadMore : Model -> (Model, Cmd Msg)
 loadMore model =
     case model.subCategories of
         (sc::scs) -> ({ model | subCategories = scs},
-                      getCategoryMembers sc.title Nothing)
+                      getCategoryMembers model.wikiHost sc.title Nothing)
         [] -> case model.continue of
                   Just str ->
-                      (model, getCategoryMembers model.category (Just str))
+                      (model, getCategoryMembers
+                                  model.wikiHost
+                                  model.category
+                                  (Just str))
                   Nothing -> (model, Cmd.none)
 
 categoryList : Json.Decoder CategoryList
