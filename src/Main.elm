@@ -206,7 +206,7 @@ viewResults model =
              style "font-family" "'PT Mono', monospace",
              style "line-height" "1.6",
              style "font-size" "13px"
-        ] (List.map mkListItem (Array.toList matches)),
+        ] (List.map mkListItem (Array.toList (Array.slice 0 500 matches))),
         div [id "loadBtn",
              hidden (model.continue == Nothing &&
                      List.length model.subCategories == 0)]
