@@ -11,6 +11,8 @@ function App() {
   const [category, setCategory] = useState<string>("")
   const [regex, setRegex] = useState<string>("")
   const [members, setMembers] = useState<string[]>([])
+  const [continuation, setContinuation] = useState<string|null>(null)
+
   const re = RegExp(regex)
   const matches = members.filter((member) => re.test(member))
 
@@ -19,11 +21,26 @@ function App() {
     setRegex(value)
   }
 
-  const blurit = () => {
-    axios.get("https://" + wikiHost + "/w/api.php?action=query&list=categorymembers&origin=*&format=json&cmtitle=Category:" + category
-    ).then((result) => {
-      setMembers(result.data.query.categorymembers.map((m) => m.title))
+  const loadMembers = () => {
+    let url = "https://" + wikiHost + "/w/api.php?action=query&list=categorymembers&origin=*&format=json&cmtitle=Category:" + category
+    if (continuation) {
+      url += "&cmcontinue=" + continuation
+    }
+    console.log(url)
+
+    axios.get(url)
+    .then((result) => {
+      console.log(result)
+      setContinuation(result.data.continue.cmcontinue)
+      const newMembers = result.data.query.categorymembers.map(
+        (m) => m.title
+      )
+      setMembers([...members, ...newMembers])
     })
+  }
+
+  const onBlurCategory = () => {
+    loadMembers()
   }
 
   const inputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,7 +62,7 @@ function App() {
       <Autocomplete
         disablePortal
         onInputChange={inputChange}
-        onBlur={blurit}
+        onBlur={onBlurCategory}
         options={categories}
         sx={{ width: 300 }}
         renderInput={(params) => <TextField {...params} label="Category" />}
@@ -57,7 +74,12 @@ function App() {
         onChange={updateRegex}
       />
 
-      <MemberOutput members={matches} host={wikiHost} />
+      <MemberOutput
+        members={matches}
+        host={wikiHost}
+        hasMore={continuation}
+        next={loadMembers}
+        />
     </>
   )
 }
