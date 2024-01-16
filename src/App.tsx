@@ -9,55 +9,46 @@ import './App.css'
 const wikiHost = "en.wikipedia.org"
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [category, setCategory] = useState<string>("")
+  const [categories, setCategories] = useState<string[]>([])
+  const [members, setMembers] = useState<string[]>([])
 
-  const [categories, setCategories] = useState<[{label}]>([])
-
+  const blurit = () => {
+    console.log("https://" + wikiHost + "/w/api.php?action=query&list=categorymembers&origin=*&format=json&cmtitle=" + category)
+    axios.get("https://" + wikiHost + "/w/api.php?action=query&list=categorymembers&origin=*&format=json&cmtitle=Category:" + category
+    ).then((result) => {
+      console.log(result)
+      setMembers(result.data.query.categorymembers.map((m) => m.title))
+    })
+  }
 
   const inputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const target = (event.target || event.currentTarget) as HTMLInputElement
-    console.log(target.value)
+    setCategory(target.value)
 
     axios.get(
       "https://" + wikiHost + "/w/api.php?action=query&list=allcategories&acprefix=" + target.value + "&origin=*&format=json",
     ).then((result) => {
-      const matched = result.data.query.allcategories.map((item) => item["*"])
-      const formated = matched.map((item) => { return { label: item } })
-      setCategories(formated)
+      const matched = result.data.query.allcategories.map(
+        (item) => item["*"]
+      )
+      setCategories(matched)
     })
-
   }
 
   return (
     <>
       <Autocomplete
         disablePortal
-        id="combo-box-demo"
         onInputChange={inputChange}
+        onBlur={blurit}
         options={categories}
         sx={{ width: 300 }}
         renderInput={(params) => <TextField {...params} label="Category" />}
       />
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <ul>
+        {members.map((title, idx) => ( <li>{title}</li>)) }
+      </ul>
     </>
   )
 }
