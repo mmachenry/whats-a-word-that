@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Autocomplete from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
+import Button from '@mui/material/Button'
 import MemberOutput from './components/MemberOutput'
 import axios from 'axios'
 
@@ -10,11 +11,12 @@ function App() {
   const [categories, setCategories] = useState<string[]>([])
   const [category, setCategory] = useState<string>("")
   const [regex, setRegex] = useState<string>("")
-  const [members, setMembers] = useState<string[]>([])
+  const [pages, setPages] = useState<string[]>([])
+  const [subCategories, setSubCategories] = useState<string[]>([])
   const [continuation, setContinuation] = useState<string|null>(null)
 
   const re = RegExp(regex)
-  const matches = members.filter((member) => re.test(member))
+  const matches = pages.filter((page) => re.test(page))
 
   const updateRegex = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value
@@ -26,16 +28,14 @@ function App() {
     if (continuation) {
       url += "&cmcontinue=" + continuation
     }
-    console.log(url)
 
-    axios.get(url)
-    .then((result) => {
-      console.log(result)
-      setContinuation(result.data.continue.cmcontinue)
-      const newMembers = result.data.query.categorymembers.map(
-        (m) => m.title
-      )
-      setMembers([...members, ...newMembers])
+    axios.get(url).then((result) => {
+      setContinuation(result.data.continue?.cmcontinue)
+      const newMembers = result.data.query.categorymembers
+      const newSubCategories = newMembers.filter((item) => item.ns == 14).map((item) => item.title)
+      const newPages = newMembers.filter((item) => item.ns == 0).map((item) => item.title)
+      setPages([...pages, ...newPages])
+      setSubCategories([...subCategories, newSubCategories])
     })
   }
 
@@ -73,7 +73,10 @@ function App() {
         label="Regex"
         onChange={updateRegex}
       />
+
       <p>contination: {continuation}</p>
+      <Button onClick={loadMembers}>Load</Button>
+
       <MemberOutput
         members={matches}
         host={wikiHost}
