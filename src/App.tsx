@@ -22,7 +22,7 @@ function App() {
   }
 
   const loadMembers = () => {
-    let url = "https://" + wikiHost + "/w/api.php?action=query&list=categorymembers&origin=*&format=json&cmtitle=Category:" + category
+    let url = "https://" + wikiHost + "/w/api.php?action=query&list=categorymembers&origin=*&format=json&cmlimit=100&cmtitle=Category:" + category
     if (continuation) {
       url += "&cmcontinue=" + continuation
     }
@@ -73,7 +73,7 @@ function App() {
         label="Regex"
         onChange={updateRegex}
       />
-
+      <p>contination: {continuation}</p>
       <MemberOutput
         members={matches}
         host={wikiHost}

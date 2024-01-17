@@ -20,3 +20,5 @@ in-page help with examples
 "What's a word that... is a... matching ..."
 
 Easy clear buttom for the regex and maybe the category
+
+Expand nested categories

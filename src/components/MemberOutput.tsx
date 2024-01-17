@@ -8,9 +8,18 @@ interface IProps {
 export default (props: IProps) => {
   return (
     <>
-      <ol>
+      <div
+        id="scrollableDiv"
+        style={{
+          height: 300,
+          overflow: 'auto',
+          display: 'flex',
+          flexDirection: 'column-reverse',
+        }}
+      >
         <InfiniteScroll
-          height="200px"
+          scrollableTarget="scrollableDiv"
+          style={{ display: 'flex', flexDirection: 'column' }}
           dataLength={props.members.length}
           next={props.next}
           hasMore={props.hasMore}
@@ -22,10 +31,10 @@ export default (props: IProps) => {
           }
         >
           {props.members.map((item,idx) => (
-            <li key={idx}>{item}</li>
+            <div key={idx}>{idx} {item}</div>
           ))}
         </InfiniteScroll>
-      </ol>
+      </div>
     </>
   )
 }
