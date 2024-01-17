@@ -22,3 +22,5 @@ in-page help with examples
 Easy clear buttom for the regex and maybe the category
 
 Expand nested categories
+
+clear the list when the category changes

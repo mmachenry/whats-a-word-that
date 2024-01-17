@@ -1,13 +1,33 @@
 import InfiniteScroll from 'react-infinite-scroll-component'
+import Button from '@mui/material/Button'
 
 interface IProps {
   host: string;
   members: string[];
+  hasMore: boolean;
 }
 
 export default (props: IProps) => {
+// /*
   return (
     <>
+      {props.members.map((item,idx) => (
+        <div key={idx}>{idx} {item}</div>
+      ))}
+      <Button
+        onClick={props.next}
+        disabled={!props.hasMore}
+        >
+        Load more
+      </Button>
+    </>
+  )
+// */
+
+ /*
+  return (
+    <>
+        <p>{props.hasMore?"has more":"no more"}</p>
       <div
         id="scrollableDiv"
         style={{
@@ -37,4 +57,5 @@ export default (props: IProps) => {
       </div>
     </>
   )
+// */
 }

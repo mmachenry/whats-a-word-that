@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import Autocomplete from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
-import Button from '@mui/material/Button'
 import MemberOutput from './components/MemberOutput'
 import axios from 'axios'
 
@@ -24,7 +23,7 @@ function App() {
   }
 
   const loadMembers = () => {
-    let url = "https://" + wikiHost + "/w/api.php?action=query&list=categorymembers&origin=*&format=json&cmlimit=100&cmtitle=Category:" + category
+    let url = "https://" + wikiHost + "/w/api.php?action=query&list=categorymembers&origin=*&format=json&cmlimit=10&cmtitle=Category:" + category
     if (continuation) {
       url += "&cmcontinue=" + continuation
     }
@@ -32,8 +31,9 @@ function App() {
     axios.get(url).then((result) => {
       setContinuation(result.data.continue?.cmcontinue)
       const newMembers = result.data.query.categorymembers
-      const newSubCategories = newMembers.filter((item) => item.ns == 14).map((item) => item.title)
-      const newPages = newMembers.filter((item) => item.ns == 0).map((item) => item.title)
+      //const newSubCategories = newMembers.filter((item) => item.ns == 14).map((item) => item.title)
+      //const newPages = newMembers.filter((item) => item.ns == 0).map((item) => item.title)
+      const newPages = newMembers.map((item) => item.title)
       setPages([...pages, ...newPages])
       setSubCategories([...subCategories, newSubCategories])
     })
@@ -75,12 +75,11 @@ function App() {
       />
 
       <p>contination: {continuation}</p>
-      <Button onClick={loadMembers}>Load</Button>
 
       <MemberOutput
         members={matches}
         host={wikiHost}
-        hasMore={continuation}
+        hasMore={typeof(continuation) === 'string'}
         next={loadMembers}
         />
     </>
