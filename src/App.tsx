@@ -31,9 +31,9 @@ function App() {
     axios.get(url).then((result) => {
       setContinuation(result.data.continue?.cmcontinue)
       const newMembers = result.data.query.categorymembers
-      //const newSubCategories = newMembers.filter((item) => item.ns == 14).map((item) => item.title)
-      //const newPages = newMembers.filter((item) => item.ns == 0).map((item) => item.title)
-      const newPages = newMembers.map((item) => item.title)
+      // what namespace are lists in and what should I do with them?
+      const newSubCategories = newMembers.filter((item) => item.ns == 14).map((item) => item.title)
+      const newPages = newMembers.filter((item) => item.ns == 0).map((item) => item.title)
       setPages([...pages, ...newPages])
       setSubCategories([...subCategories, newSubCategories])
     })
