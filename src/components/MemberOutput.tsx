@@ -1,22 +1,33 @@
+import { useState } from 'react'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import Button from '@mui/material/Button'
 
 interface IProps {
   host: string;
-  members: string[];
-  hasMore: boolean;
+  category: string;
+  pattern: string;
 }
 
-export default (props: IProps) => {
+export default function MemberOutput (props: IProps) {
+  const [pages, setPages] = useState<string[]>([])
+
+  const loadMore = () => {
+  }
+
+  const hasMore = false
+  const re = RegExp(props.pattern)
+  const matches = pages.filter((page) => re.test(page))
+
 // /*
   return (
     <>
-      {props.members.map((item,idx) => (
+      <p>{props.category} | {props.pattern}</p>
+      {pages.map((item,idx) => (
         <div key={idx}>{idx} {item}</div>
       ))}
       <Button
-        onClick={props.next}
-        disabled={!props.hasMore}
+        onClick={loadMore}
+        disabled={hasMore}
         >
         Load more
       </Button>
